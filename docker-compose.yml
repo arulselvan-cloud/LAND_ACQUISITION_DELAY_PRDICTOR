@@ -1,0 +1,18 @@
+services:
+  # Placeholder for PostgreSQL + PostGIS Spatial Database
+  postgres-postgis:
+    image: postgis/postgis:16-3.4
+    container_name: landsight-postgis
+    environment:
+      POSTGRES_DB: landsight_db
+      POSTGRES_USER: landsight_user
+      POSTGRES_PASSWORD: landsight_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgis_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+volumes:
+  postgis_data:
+    driver: local
