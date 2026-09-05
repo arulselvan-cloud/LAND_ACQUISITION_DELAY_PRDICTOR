@@ -241,7 +241,7 @@ def get_seed_payloads():
                 "target_possession_date": today + datetime.timedelta(days=180),
                 "status": "in_progress",
                 "location": WKTElement("POINT(77.5946 12.9716)", srid=4326),
-                "data_source": DataSourceEnum.synthetic,
+                "data_source": DataSourceEnum.real,
             },
             "stages": [
                 {
@@ -253,7 +253,7 @@ def get_seed_payloads():
                     "start_date": today - datetime.timedelta(days=320),
                     "actual_completion_date": today - datetime.timedelta(days=278),
                     "delay_days": 0,
-                    "data_source": DataSourceEnum.synthetic,
+                    "data_source": DataSourceEnum.real,
                 },
                 {
                     "stage_name": StageNameEnum.survey,
@@ -264,7 +264,7 @@ def get_seed_payloads():
                     "start_date": today - datetime.timedelta(days=278),
                     "actual_completion_date": today - datetime.timedelta(days=203),
                     "delay_days": 15,
-                    "data_source": DataSourceEnum.synthetic,
+                    "data_source": DataSourceEnum.real,
                 },
                 {
                     "stage_name": StageNameEnum.compensation,
@@ -275,7 +275,7 @@ def get_seed_payloads():
                     "start_date": today - datetime.timedelta(days=203),
                     "actual_completion_date": today - datetime.timedelta(days=108),
                     "delay_days": 5,
-                    "data_source": DataSourceEnum.synthetic,
+                    "data_source": DataSourceEnum.real,
                 },
                 {
                     "stage_name": StageNameEnum.possession,
@@ -286,7 +286,7 @@ def get_seed_payloads():
                     "start_date": today - datetime.timedelta(days=108),
                     "target_completion_date": today - datetime.timedelta(days=18),
                     "delay_days": 20,
-                    "data_source": DataSourceEnum.synthetic,
+                    "data_source": DataSourceEnum.real,
                 },
                 {
                     "stage_name": StageNameEnum.rehabilitation,
@@ -296,7 +296,7 @@ def get_seed_payloads():
                     "status": StageStatusEnum.in_progress,
                     "start_date": today - datetime.timedelta(days=150),
                     "delay_days": 10,
-                    "data_source": DataSourceEnum.synthetic,
+                    "data_source": DataSourceEnum.real,
                 },
             ],
             "compensation": {
@@ -308,7 +308,7 @@ def get_seed_payloads():
                 "status": CompensationStatusEnum.fully_disbursed,
                 "last_disbursement_date": today - datetime.timedelta(days=30),
                 "notes": "Direct consent agreements executed for 94% of land parcels.",
-                "data_source": DataSourceEnum.synthetic,
+                "data_source": DataSourceEnum.real,
             },
             "disputes": [
                 {
@@ -322,7 +322,7 @@ def get_seed_payloads():
                     "petitioner_name": "Muniswamappa & Sons",
                     "respondent_name": "K-RIDE & Special Deputy Commissioner",
                     "summary": "Private title contestation; compensation deposit deposited into court registry.",
-                    "data_source": DataSourceEnum.synthetic,
+                    "data_source": DataSourceEnum.real,
                 }
             ],
             "rehabilitation": {
@@ -335,7 +335,7 @@ def get_seed_payloads():
                 "rr_scheme_status": RRSchemeStatusEnum.in_progress,
                 "completion_percentage": 89.2,
                 "notes": "Final 7 commercial tenants scheduled for relocation next week.",
-                "data_source": DataSourceEnum.synthetic,
+                "data_source": DataSourceEnum.real,
             },
             "risk_score": {
                 "risk_category": RiskCategoryEnum.low,
@@ -353,7 +353,7 @@ def get_seed_payloads():
                     {"factor": "commercial_tenant_relocation", "impact": 0.15, "description": "7 urban commercial tenants pending final key handover"},
                     {"factor": "utility_shifting", "impact": 0.08, "description": "BESCOM powerline relocation co-ordination"},
                 ],
-                "data_source": DataSourceEnum.synthetic,
+                "data_source": DataSourceEnum.real,
             },
             "recommendations": [
                 {
@@ -362,7 +362,7 @@ def get_seed_payloads():
                     "category": "Administrative / Utilities",
                     "expected_impact": "Unlocks final 1.2 km right of way on schedule.",
                     "is_implemented": True,
-                    "data_source": DataSourceEnum.synthetic,
+                    "data_source": DataSourceEnum.real,
                 }
             ],
             "alerts": [
@@ -371,7 +371,7 @@ def get_seed_payloads():
                     "message": "BESCOM utility relocation lagging by 10 days; low risk to critical track-laying path.",
                     "severity": AlertSeverityEnum.low,
                     "resolved": False,
-                    "data_source": DataSourceEnum.synthetic,
+                    "data_source": DataSourceEnum.real,
                 }
             ],
             "stakeholders": [
@@ -381,7 +381,7 @@ def get_seed_payloads():
                     "responsiveness_score": 88.0,
                     "last_contact_date": today - datetime.timedelta(days=3),
                     "notes": "Fast-tracked consent award disbursement under KIADB Section 29(2).",
-                    "data_source": DataSourceEnum.synthetic,
+                    "data_source": DataSourceEnum.real,
                 },
                 {
                     "name": "K-RIDE Chief General Manager (Civil)",
@@ -389,7 +389,7 @@ def get_seed_payloads():
                     "responsiveness_score": 94.0,
                     "last_contact_date": today - datetime.timedelta(days=1),
                     "notes": "Proactive weekly tracking meetings with municipal agencies.",
-                    "data_source": DataSourceEnum.synthetic,
+                    "data_source": DataSourceEnum.real,
                 },
             ],
         },
