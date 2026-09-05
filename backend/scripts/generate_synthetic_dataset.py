@@ -283,9 +283,8 @@ def generate_candidate_features(seq_id: int, today: datetime.date):
     x_stk = max(0.0, (75.0 - avg_stk_score) / 75.0)
     x_pesa = 1.0 if is_tribal_pesa else 0.0
     x_fam = math.log1p(families) / math.log1p(2500.0)
-
-    # Saturated logit combination
-    logit = -2.25 + (1.95 * x_dispute) + (1.85 * x_comp) + (1.40 * x_stk) + (1.25 * x_pesa) + (0.90 * x_fam) + random.gauss(0, 0.20)
+    # Saturated logit combination with calibrated noise (sigma=0.22 to hit ~78-82% accuracy range)
+    logit = -2.25 + (1.95 * x_dispute) + (1.85 * x_comp) + (1.40 * x_stk) + (1.25 * x_pesa) + (0.90 * x_fam) + random.gauss(0, 0.22)
     raw_risk_score = 1.0 / (1.0 + math.exp(-logit))
 
     return {
@@ -329,7 +328,22 @@ def build_full_record(feat: dict, risk_cat: RiskCategoryEnum, today: datetime.da
         total_delay_days = int(random.uniform(221, 550) + (random.uniform(0, 200) if feat["stay_active"] else 0))
         overall_prob = round(random.uniform(0.77, 0.98), 3)
 
-    # 1. 5 Statutory Stages
+    # 1. 5 Statutory Stages with Realistic Project Lifecycle Progression
+    # Assign lifecycle phase correlated with risk category:
+    # Low: 15% early, 35% mid, 50% late
+    # Medium: 25% early, 45% mid, 30% late
+    # High: 40% early, 45% mid, 15% late
+    # Critical: 45% early, 45% mid, 10% late
+    u = random.random()
+    if risk_cat == RiskCategoryEnum.low:
+        phase = "early" if u < 0.15 else ("mid" if u < 0.50 else "late")
+    elif risk_cat == RiskCategoryEnum.medium:
+        phase = "early" if u < 0.25 else ("mid" if u < 0.70 else "late")
+    elif risk_cat == RiskCategoryEnum.high:
+        phase = "early" if u < 0.40 else ("mid" if u < 0.85 else "late")
+    else:  # Critical
+        phase = "early" if u < 0.45 else ("mid" if u < 0.90 else "late")
+
     stage_templates = [
         (StageNameEnum.notification, 1, random.randint(45, 90), 0.03),
         (StageNameEnum.survey, 2, random.randint(60, 120), 0.12),
@@ -339,27 +353,74 @@ def build_full_record(feat: dict, risk_cat: RiskCategoryEnum, today: datetime.da
     ]
 
     stages_data = []
+    # Determine completion states for stages based on phase and risk
+    # Stage 1: Always completed
+    s1_status = StageStatusEnum.completed
+
+    # Stage 2: Survey
+    if phase == "early":
+        s2_status = StageStatusEnum.completed if (random.random() < 0.70 and total_delay_days < 100) else (
+            StageStatusEnum.delayed if total_delay_days > 60 else StageStatusEnum.in_progress
+        )
+    else:
+        s2_status = StageStatusEnum.completed
+
+    # Stage 3: Compensation
+    if phase == "early":
+        if s2_status == StageStatusEnum.completed:
+            s3_status = StageStatusEnum.delayed if total_delay_days > 70 else StageStatusEnum.in_progress
+        else:
+            s3_status = StageStatusEnum.not_started
+    elif phase == "mid":
+        comp_comp_prob = {"low": 0.85, "medium": 0.65, "high": 0.35, "critical": 0.20}[risk_cat.value]
+        if random.random() < comp_comp_prob:
+            s3_status = StageStatusEnum.completed
+        else:
+            s3_status = StageStatusEnum.delayed if total_delay_days > 60 else StageStatusEnum.in_progress
+    else:  # late
+        s3_status = StageStatusEnum.completed
+
+    # Stage 4: Possession
+    if phase == "early":
+        s4_status = StageStatusEnum.not_started
+    elif phase == "mid":
+        if s3_status == StageStatusEnum.completed:
+            s4_status = StageStatusEnum.delayed if total_delay_days > 75 else StageStatusEnum.in_progress
+        else:
+            s4_status = StageStatusEnum.not_started
+    else:  # late
+        poss_comp_prob = {"low": 0.95, "medium": 0.75, "high": 0.40, "critical": 0.25}[risk_cat.value]
+        if random.random() < poss_comp_prob:
+            s4_status = StageStatusEnum.completed
+        else:
+            s4_status = StageStatusEnum.delayed if total_delay_days > 80 else StageStatusEnum.in_progress
+
+    # Stage 5: Rehabilitation
+    if phase in ("early", "mid"):
+        s5_status = StageStatusEnum.not_started
+    else:  # late
+        if s4_status == StageStatusEnum.completed:
+            rehab_comp_prob = {"low": 0.90, "medium": 0.70, "high": 0.35, "critical": 0.20}[risk_cat.value]
+            s5_status = StageStatusEnum.completed if random.random() < rehab_comp_prob else StageStatusEnum.in_progress
+        else:
+            s5_status = StageStatusEnum.in_progress if random.random() < 0.5 else StageStatusEnum.not_started
+
+    status_map = {1: s1_status, 2: s2_status, 3: s3_status, 4: s4_status, 5: s5_status}
+
     for s_name, s_order, planned_days, weight in stage_templates:
         stage_delay = int(total_delay_days * weight)
         actual_days = planned_days + stage_delay
+        status = status_map[s_order]
 
-        if s_order == 1:
-            status = StageStatusEnum.completed
+        if status == StageStatusEnum.completed:
             actual_duration = actual_days
-        elif s_order == 2:
-            status = StageStatusEnum.completed if total_delay_days < 250 else StageStatusEnum.delayed
-            actual_duration = actual_days if status == StageStatusEnum.completed else None
-        elif s_order in (3, 4):
-            if stage_delay > 45:
-                status = StageStatusEnum.delayed
-            elif stage_delay > 0:
-                status = StageStatusEnum.in_progress
-            else:
-                status = StageStatusEnum.completed if total_delay_days == 0 else StageStatusEnum.in_progress
-            actual_duration = actual_days if status == StageStatusEnum.completed else None
-        else:
-            status = StageStatusEnum.in_progress if feat["families"] > 50 else StageStatusEnum.completed
-            actual_duration = actual_days if status == StageStatusEnum.completed else None
+            recorded_delay = stage_delay
+        elif status in (StageStatusEnum.in_progress, StageStatusEnum.delayed):
+            actual_duration = None
+            recorded_delay = stage_delay
+        else:  # not_started
+            actual_duration = None
+            recorded_delay = 0
 
         stages_data.append({
             "stage_name": s_name,
@@ -367,7 +428,7 @@ def build_full_record(feat: dict, risk_cat: RiskCategoryEnum, today: datetime.da
             "planned_duration_days": planned_days,
             "actual_duration_days": actual_duration,
             "status": status,
-            "delay_days": stage_delay,
+            "delay_days": recorded_delay,
             "data_source": DataSourceEnum.synthetic,
         })
 
