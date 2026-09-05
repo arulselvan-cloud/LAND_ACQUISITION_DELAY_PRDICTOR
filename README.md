@@ -41,23 +41,33 @@
 ### Prerequisites
 - Python 3.10+
 - Node.js 18+ and npm
+- Docker & Docker Compose
 - Git
-- Docker & Docker Compose (optional, for PostGIS)
 
-### 1. Clone & Environment Setup
+### 1. Database Setup (Docker Compose)
+Start the PostgreSQL + PostGIS spatial database service using Docker Compose:
 ```bash
-# Clone the repository
-git clone <repository-url>
-cd landsight-ai
+# Ensure .env is configured (copy from .env.example if needed)
+cp .env.example .env
 
-# Activate root Python virtual environment
+# Spin up PostgreSQL + PostGIS container
+docker compose up -d
+```
+> [!NOTE]
+> `DATABASE_URL` in `.env` points to `localhost:5432` using your `.env` credentials:  
+> `postgresql://<POSTGRES_USER>:<POSTGRES_PASSWORD>@localhost:5432/<POSTGRES_DB>`  
+> The service includes an automatic healthcheck verifying database readiness via `pg_isready`.
+
+### 2. Python Virtual Environment Setup
+```bash
+# Activate the root Python virtual environment
 # On Windows:
 .\venv\Scripts\activate
 # On Linux/macOS:
 source venv/bin/activate
 ```
 
-### 2. Backend Setup
+### 3. Backend Setup
 ```bash
 # Install backend dependencies (when ready)
 pip install -r backend/requirements.txt
@@ -67,7 +77,7 @@ cd backend
 python -m uvicorn app.main:app --reload --port 8000
 ```
 
-### 3. Frontend Setup
+### 4. Frontend Setup
 ```bash
 # Navigate to frontend and install dependencies
 cd frontend
@@ -75,12 +85,6 @@ npm install
 
 # Start Vite development server
 npm run dev
-```
-
-### 4. Database Services (Optional)
-```bash
-# Spin up PostgreSQL + PostGIS container
-docker-compose up -d
 ```
 
 ---
