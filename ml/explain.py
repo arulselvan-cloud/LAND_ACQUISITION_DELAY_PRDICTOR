@@ -6,7 +6,7 @@ extracting top 5 risk drivers with magnitude and direction, and global feature i
 
 import sys
 from pathlib import Path
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 import joblib
 import numpy as np
@@ -42,27 +42,36 @@ FEATURE_HUMAN_NAMES = {
 class ModelExplainer:
     """Wrapper around trained XGBoost classifier and SHAP TreeExplainer."""
 
-    def __init__(self, model_bundle_path: Optional[Path] = None):
-        if model_bundle_path is None:
-            model_bundle_path = ml_dir / "models" / "risk_classifier.joblib"
+    def __init__(
+        self,
+        model_bundle_path: Optional[Path] = None,
+        bundle: Optional[Dict] = None,
+        explainer: Optional[shap.TreeExplainer] = None,
+    ):
+        if bundle is not None:
+            self.bundle = bundle
+        else:
+            if model_bundle_path is None:
+                model_bundle_path = ml_dir / "models" / "risk_classifier.joblib"
 
-        if not model_bundle_path.exists():
-            raise FileNotFoundError(f"Classifier model not found at {model_bundle_path}. Run ml/train_classifier.py first.")
+            if not model_bundle_path.exists():
+                raise FileNotFoundError(f"Classifier model not found at {model_bundle_path}. Run ml/train_classifier.py first.")
 
-        self.bundle = joblib.load(model_bundle_path)
+            self.bundle = joblib.load(model_bundle_path)
+
         self.model = self.bundle["model"]
         self.feature_names = self.bundle["feature_names"]
         self.encoders = self.bundle["encoders"]
         self.label_map = self.bundle["label_map"]
         self.inv_label_map = self.bundle["inv_label_map"]
 
-        # Initialize TreeExplainer
-        self.explainer = shap.TreeExplainer(self.model)
+        # Initialize TreeExplainer or reuse preloaded
+        self.explainer = explainer if explainer is not None else shap.TreeExplainer(self.model)
 
-    def explain_prediction(self, project_id: str) -> Dict:
-        """Explains risk prediction for an individual project by ID."""
+    def explain_prediction(self, project_id: str, session: Optional[Any] = None) -> Dict:
+        """Explains risk prediction for an individual project by ID or code."""
         # 1. Fetch encoded feature vector
-        feat_df = get_project_feature_vector(project_id, self.encoders)
+        feat_df = get_project_feature_vector(project_id, self.encoders, session=session)
         feat_vals = feat_df.iloc[0].to_dict()
 
         # 2. Predict probabilities and risk class
@@ -90,6 +99,7 @@ class ModelExplainer:
                 "display_name": FEATURE_HUMAN_NAMES.get(feat_name, feat_name),
                 "value": raw_val,
                 "shap_value": round(float(shap_val), 4),
+                "magnitude": round(float(abs(shap_val)), 4),
                 "impact": round(float(abs(shap_val)), 4),
                 "direction": direction,
             })

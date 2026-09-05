@@ -313,19 +313,42 @@ def build_full_record(feat: dict, risk_cat: RiskCategoryEnum, today: datetime.da
     """Builds complete relational payload calibrated to assigned risk category."""
     raw_score = feat["raw_risk_score"]
 
-    # Map delay days monotonically according to risk category with realistic variance
+    # Autoregressive stage delay generation with partial carryover and independent stage shocks
+    x_dispute = 1.0 if feat["stay_active"] else (0.55 if feat["has_dispute"] else 0.0)
+    comp_gap = max(0.0, 1.0 - feat["disbursement_pct"])
+    stk_deficit = max(0.0, (75.0 - feat["avg_stk_score"]) / 75.0)
+
+    # Stage 1: Notification
+    shock1 = max(0, int(round(3 + 12 * x_dispute + 14 * stk_deficit + random.gauss(0, 7))))
+    d1 = shock1
+
+    # Stage 2: Survey
+    shock2 = max(0, int(round(5 + 15 * x_dispute + 18 * stk_deficit + random.gauss(0, 10))))
+    d2 = max(0, int(round(0.48 * d1 + shock2)))
+
+    # Stage 3: Compensation
+    shock3 = max(0, int(round(8 + 42 * x_dispute + 50 * comp_gap + 18 * stk_deficit + random.gauss(0, 24))))
+    d3 = max(0, int(round(0.46 * d2 + shock3)))
+
+    # Stage 4: Possession
+    shock4 = max(0, int(round(8 + 44 * x_dispute + 30 * comp_gap + 16 * stk_deficit + random.gauss(0, 26))))
+    d4 = max(0, int(round(0.44 * d3 + shock4)))
+
+    # Stage 5: Rehabilitation
+    shock5 = max(0, int(round(6 + 18 * x_dispute + 20 * comp_gap + 14 * stk_deficit + random.gauss(0, 20))))
+    d5 = max(0, int(round(0.36 * d4 + shock5)))
+
+    stage_delays = {1: d1, 2: d2, 3: d3, 4: d4, 5: d5}
+    total_delay_days = d1 + d2 + d3 + d4 + d5
+
+    # Assign overall probability aligned with risk category
     if risk_cat == RiskCategoryEnum.low:
-        total_delay_days = int(random.uniform(0, 35))
         overall_prob = round(random.uniform(0.05, 0.28), 3)
     elif risk_cat == RiskCategoryEnum.medium:
-        total_delay_days = int(random.uniform(36, 95))
         overall_prob = round(random.uniform(0.29, 0.52), 3)
     elif risk_cat == RiskCategoryEnum.high:
-        total_delay_days = int(random.uniform(96, 220))
         overall_prob = round(random.uniform(0.53, 0.76), 3)
     else:  # Critical
-        # Heavy tail for critical delays
-        total_delay_days = int(random.uniform(221, 550) + (random.uniform(0, 200) if feat["stay_active"] else 0))
         overall_prob = round(random.uniform(0.77, 0.98), 3)
 
     # 1. 5 Statutory Stages with Realistic Project Lifecycle Progression
@@ -345,11 +368,11 @@ def build_full_record(feat: dict, risk_cat: RiskCategoryEnum, today: datetime.da
         phase = "early" if u < 0.45 else ("mid" if u < 0.90 else "late")
 
     stage_templates = [
-        (StageNameEnum.notification, 1, random.randint(45, 90), 0.03),
-        (StageNameEnum.survey, 2, random.randint(60, 120), 0.12),
-        (StageNameEnum.compensation, 3, random.randint(90, 180), 0.40),
-        (StageNameEnum.possession, 4, random.randint(60, 120), 0.32),
-        (StageNameEnum.rehabilitation, 5, random.randint(120, 240), 0.13),
+        (StageNameEnum.notification, 1, random.randint(45, 90)),
+        (StageNameEnum.survey, 2, random.randint(60, 120)),
+        (StageNameEnum.compensation, 3, random.randint(90, 180)),
+        (StageNameEnum.possession, 4, random.randint(60, 120)),
+        (StageNameEnum.rehabilitation, 5, random.randint(120, 240)),
     ]
 
     stages_data = []
@@ -407,8 +430,8 @@ def build_full_record(feat: dict, risk_cat: RiskCategoryEnum, today: datetime.da
 
     status_map = {1: s1_status, 2: s2_status, 3: s3_status, 4: s4_status, 5: s5_status}
 
-    for s_name, s_order, planned_days, weight in stage_templates:
-        stage_delay = int(total_delay_days * weight)
+    for s_name, s_order, planned_days in stage_templates:
+        stage_delay = stage_delays[s_order]
         actual_days = planned_days + stage_delay
         status = status_map[s_order]
 

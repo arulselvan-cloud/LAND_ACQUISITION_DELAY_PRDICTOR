@@ -93,25 +93,26 @@ In accordance with biostatistical and survival analysis standards:
 ### Model Concordance & Hazard Ratios
 
 #### Stage 3: Compensation Milestone
-- **Observations Analyzed**: 2,828 (1,891 completed events, 937 right-censored)
-- **Concordance Index ($C$-Index)**: **0.7120**
+- **Observations Analyzed**: 2,681 (1,916 completed events, 765 right-censored)
+- **Concordance Index ($C$-Index)**: **0.6673**
 
 | Covariate | Coefficient ($\beta$) | Hazard Ratio ($\exp(\beta)$) | $p$-value | Causal Interpretation |
 | :--- | :---: | :---: | :---: | :--- |
-| `compensation_disbursed_pct` | $+0.0186$ | **1.0188** | $2.29 \times 10^{-48}$ | Disbursement progress directly drives statutory award declaration rate. |
-| `avg_stakeholder_responsiveness`| $+0.0359$ | **1.0366** | $6.92 \times 10^{-40}$ | High stakeholder responsiveness accelerates milestone completion. |
-| `has_active_legal_dispute` | $-0.7917$ | **0.4531** | $2.18 \times 10^{-6}$ | Active court stay cuts the instant hazard of completion by more than half (54.7%). |
-| `dispute_delay_impact_days` | $-0.0121$ | **0.9880** | $1.70 \times 10^{-52}$ | Litigation delays depress monthly milestone execution pace. |
+| `compensation_disbursed_pct` | $+0.0145$ | **1.0146** | $4.03 \times 10^{-30}$ | Disbursement progress directly drives statutory award declaration rate. |
+| `avg_stakeholder_responsiveness`| $+0.0144$ | **1.0145** | $4.57 \times 10^{-7}$ | High stakeholder responsiveness accelerates milestone completion. |
+| `has_active_legal_dispute` | $-0.6980$ | **0.4976** | $2.80 \times 10^{-6}$ | Active court stay cuts the instant hazard of completion by more than half (50.2%). |
+| `dispute_delay_impact_days` | $-0.0095$ | **0.9906** | $4.55 \times 10^{-37}$ | Litigation delays depress monthly milestone execution pace. |
 
 #### Stage 4: Possession Milestone
-- **Observations Analyzed**: 1,892 (860 completed events, 1,032 right-censored)
-- **Concordance Index ($C$-Index)**: **0.6803**
+- **Observations Analyzed**: 1,917 (880 completed events, 1,037 right-censored)
+- **Concordance Index ($C$-Index)**: **0.6895**
 
 | Covariate | Coefficient ($\beta$) | Hazard Ratio ($\exp(\beta)$) | $p$-value | Causal Interpretation |
 | :--- | :---: | :---: | :---: | :--- |
-| `compensation_disbursed_pct` | $+0.0208$ | **1.0210** | $8.21 \times 10^{-28}$ | High disbursement removes landowner resistance during physical handover. |
-| `avg_stakeholder_responsiveness`| $+0.0295$ | **1.0300** | $6.04 \times 10^{-13}$ | Revenue department coordination directly governs eviction/demarcation. |
-| `dispute_delay_impact_days` | $-0.0186$ | **0.9816** | $3.23 \times 10^{-23}$ | Court injunctions halt physical boundary demarcation. |
+| `compensation_disbursed_pct` | $+0.0205$ | **1.0208** | $1.24 \times 10^{-26}$ | High disbursement removes landowner resistance during physical handover. |
+| `avg_stakeholder_responsiveness`| $+0.0103$ | **1.0104** | $2.01 \times 10^{-2}$ | Revenue department coordination directly governs eviction/demarcation. |
+| `has_active_legal_dispute` | $-1.0080$ | **0.3649** | $1.60 \times 10^{-2}$ | Active stay order severely impedes lawful physical handover. |
+| `dispute_delay_impact_days` | $-0.0158$ | **0.9843** | $7.08 \times 10^{-26}$ | Court injunctions halt physical boundary demarcation. |
 
 ---
 
@@ -165,10 +166,50 @@ result = what_if("b7e129af-46b6-4a23-8626-5a8c0d3540ca", changes)
 
 ---
 
-## 5. Artifact Directory & Verification Commands
+## 5. Delay Propagation Model ("Impact Map")
+
+The sequential delay propagation engine in `ml/propagation.py` models statutory milestone dependencies across the full acquisition lifecycle:
+$$\text{Notification} \longrightarrow \text{Survey} \longrightarrow \text{Compensation} \longrightarrow \text{Possession} \longrightarrow \text{Rehabilitation}$$
+
+With the realistic autoregressive partial-carryover model, downstream delays reflect genuine statutory dynamics: upstream delays are a real contributing factor ($\beta_{\text{upstream}} \in (0, 1)$), independent stage-specific shocks capture bureaucratic variance, and $R^2$ sits squarely in the realistic $0.37 - 0.43$ range.
+
+### Consecutive Stage-Pair Regression Metrics
+
+| Stage Transition | Active Training Pairs ($N$) | $R^2$ Score | Intercept | Upstream Delay Coef ($\beta_{\text{upstream}}$) | Active Dispute Coef | Responsiveness Coef | Disbursement Coef |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **Notification $\to$ Survey** | 3,503 | **0.4138** | $+22.2066$ | **+0.6507** | $+10.0402$ | $-0.1999$ | $+0.0032$ |
+| **Survey $\to$ Compensation** | 2,681 | **0.3728** | $+69.7907$ | **+0.7776** | $+33.4868$ | $-0.1785$ | $-0.4551$ |
+| **Compensation $\to$ Possession** | 1,917 | **0.4293** | $+42.7401$ | **+0.5550** | **+34.1776** | $-0.1062$ | $-0.2105$ |
+| **Possession $\to$ Rehabilitation** | 1,001 | **0.4018** | $+31.7138$ | **+0.3860** | $+12.4529$ | $-0.0740$ | $-0.1577$ |
+
+> [!NOTE]
+> **Directional Correctness & Partial Carryover**:
+> 1. Upstream delay coefficients are strictly within $(0, 1)$ across all four milestones (ranging from $+0.3860$ to $+0.7776$), demonstrating realistic partial carryover rather than explosive amplification.
+> 2. `has_active_legal_dispute` is strongly positive across all transitions, notably $+34.18\text{ days}$ on the critical **Compensation $\to$ Possession** transition (reversing the previous collinear artifact of $-0.04$).
+> 3. Higher stakeholder responsiveness and faster compensation disbursement consistently compress downstream delays across all transitions.
+
+### Showcase Project Cascading Validation
+
+- **CBIC-TN-PKG02** (Industrial Corridor — 120-day Compensation Bottleneck):
+  - Notification: 5 days *(Observed)*
+  - Survey: 40 days *(Observed)*
+  - Compensation: 120 days *(Observed)*
+  - Possession: **123 days** *(Predicted cascade from Compensation delay + active dispute)*
+  - Rehabilitation: **76 days** *(Predicted cascade from Possession delay)*
+  - **Total Cumulative Gated Delay**: **364 days**
+- **BSRP-KA-CORR04** (Smooth Urban Rail Delivery):
+  - Stages 1–5 observed: 0d $\to$ 15d $\to$ 5d $\to$ 20d $\to$ 10d = **50 days** cumulative.
+- **MAHSR-MH-PAL03** (High-Friction Bullet Train Corridor):
+  - Stages 1–5 observed: 30d $\to$ 90d $\to$ 150d $\to$ 120d $\to$ 90d = **480 days** cumulative.
+
+---
+
+## 6. Artifact Directory & Verification Commands
 
 All models and feature pipelines are stored as production artifacts in `ml/`:
 - `ml/features.py`: SQLAlchemy feature extractor and encoders
+- `ml/propagation.py`: Sequential delay propagation engine ("Impact Map")
+- `ml/models/delay_propagation_models.joblib`: Trained stage-pair Ridge regression models
 - `ml/models/risk_classifier.joblib`: Tuned XGBoost bundle with encoders and metadata
 - `ml/models/survival_compensation.joblib`: Cox PH Compensation model
 - `ml/models/survival_possession.joblib`: Cox PH Possession model

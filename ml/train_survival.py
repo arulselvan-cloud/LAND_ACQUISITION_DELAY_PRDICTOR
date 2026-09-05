@@ -207,15 +207,19 @@ def predict_expected_delay(
     stage_name: str,
     override_features: Optional[Dict] = None,
     session: Optional[Session] = None,
+    model_bundle: Optional[Dict] = None,
 ) -> int:
     """Predicts expected delay days beyond planned duration using trained Cox PH model."""
-    models_dir = ml_dir / "models"
-    model_file = models_dir / f"survival_{stage_name}.joblib"
-    if not model_file.exists():
-        raise FileNotFoundError(f"Survival model for stage '{stage_name}' not found at {model_file}")
+    if model_bundle is not None:
+        cph = model_bundle["model"]
+    else:
+        models_dir = ml_dir / "models"
+        model_file = models_dir / f"survival_{stage_name}.joblib"
+        if not model_file.exists():
+            raise FileNotFoundError(f"Survival model for stage '{stage_name}' not found at {model_file}")
 
-    bundle = joblib.load(model_file)
-    cph = bundle["model"]
+        bundle = joblib.load(model_file)
+        cph = bundle["model"]
 
     close_session = False
     if session is None:
@@ -224,8 +228,16 @@ def predict_expected_delay(
 
     try:
         from uuid import UUID
-        p_uuid = UUID(project_id) if isinstance(project_id, str) else project_id
-        proj = session.query(Project).filter_by(id=p_uuid).first()
+        proj = None
+        try:
+            p_uuid = UUID(project_id) if isinstance(project_id, str) else project_id
+            proj = session.query(Project).filter_by(id=p_uuid).first()
+        except (ValueError, AttributeError):
+            pass
+
+        if not proj:
+            proj = session.query(Project).filter_by(project_code=project_id).first()
+
         if not proj:
             return 0
 

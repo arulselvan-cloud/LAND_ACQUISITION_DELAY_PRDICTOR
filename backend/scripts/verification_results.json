@@ -1,0 +1,199 @@
+{
+  "POST /api/predict/{project_id}": {
+    "project_id": "b7e129af-46b6-4a23-8626-5a8c0d3540ca",
+    "risk_category": "critical",
+    "delay_probability": 0.9935,
+    "confidence_score": 0.8702
+  },
+  "GET /api/projects/{project_id}/explain": {
+    "project_id": "b7e129af-46b6-4a23-8626-5a8c0d3540ca",
+    "predicted_risk_category": "critical",
+    "factors": [
+      {
+        "feature": "has_active_legal_dispute",
+        "display_name": "Active Court Stay / Judicial Injunction",
+        "value": 1.0,
+        "direction": "increases_risk",
+        "magnitude": 1.6484,
+        "shap_value": 1.6484
+      },
+      {
+        "feature": "dispute_delay_impact_days",
+        "display_name": "Legal Dispute Delay Impact (Days)",
+        "value": 90.0,
+        "direction": "increases_risk",
+        "magnitude": 1.4045,
+        "shap_value": 1.4045
+      },
+      {
+        "feature": "avg_stakeholder_responsiveness",
+        "display_name": "Stakeholder Responsiveness Score (0-100)",
+        "value": 77.16666666666667,
+        "direction": "decreases_risk",
+        "magnitude": 0.5756,
+        "shap_value": -0.5756
+      },
+      {
+        "feature": "land_area_hectares",
+        "display_name": "Total Acquisition Land Area (Hectares)",
+        "value": 340.5,
+        "direction": "increases_risk",
+        "magnitude": 0.3022,
+        "shap_value": 0.3022
+      },
+      {
+        "feature": "affected_families_count",
+        "display_name": "Number of Project Affected Families",
+        "value": 420.0,
+        "direction": "increases_risk",
+        "magnitude": 0.1845,
+        "shap_value": 0.1845
+      }
+    ],
+    "prediction_probabilities": {
+      "low": 0.002,
+      "medium": 0.0045,
+      "high": 0.1233,
+      "critical": 0.8702
+    }
+  },
+  "GET /api/projects/{project_id}/propagation": [
+    {
+      "stage_name": "notification",
+      "stage_order": 1,
+      "status": "completed",
+      "delay_days": 5,
+      "is_predicted": false
+    },
+    {
+      "stage_name": "survey",
+      "stage_order": 2,
+      "status": "completed",
+      "delay_days": 40,
+      "is_predicted": false
+    },
+    {
+      "stage_name": "compensation",
+      "stage_order": 3,
+      "status": "delayed",
+      "delay_days": 120,
+      "is_predicted": false
+    },
+    {
+      "stage_name": "possession",
+      "stage_order": 4,
+      "status": "not_started",
+      "delay_days": 123,
+      "is_predicted": true
+    },
+    {
+      "stage_name": "rehabilitation",
+      "stage_order": 5,
+      "status": "in_progress",
+      "delay_days": 76,
+      "is_predicted": true
+    }
+  ],
+  "POST /api/projects/{project_id}/what-if": {
+    "project_id": "b7e129af-46b6-4a23-8626-5a8c0d3540ca",
+    "simulated_interventions": {
+      "compensation_disbursed_pct": 98.0,
+      "has_active_legal_dispute": 0,
+      "dispute_delay_impact_days": 0,
+      "avg_stakeholder_responsiveness": 92.0
+    },
+    "baseline": {
+      "risk_category": "critical",
+      "delay_probability": 0.9935,
+      "actual_delay_so_far_days": 165,
+      "expected_delay_days": 102,
+      "stage_breakdown": {
+        "additional_expected_compensation_delay_days": 18,
+        "additional_expected_possession_delay_days": 84
+      },
+      "class_probabilities": {
+        "low": 0.002,
+        "medium": 0.0045,
+        "high": 0.1233,
+        "critical": 0.8702
+      }
+    },
+    "counterfactual": {
+      "risk_category": "low",
+      "delay_probability": 0.0285,
+      "expected_delay_days": 0,
+      "stage_breakdown": {
+        "additional_expected_compensation_delay_days": 0,
+        "additional_expected_possession_delay_days": 0
+      },
+      "class_probabilities": {
+        "low": 0.9109,
+        "medium": 0.0606,
+        "high": 0.0257,
+        "critical": 0.0028
+      }
+    },
+    "impact": {
+      "risk_category_reduced": true,
+      "risk_tier_change": "CRITICAL -> LOW",
+      "delay_probability_reduction": 0.965,
+      "estimated_delay_days_saved": 102,
+      "summary": "Intervention shifts risk tier from CRITICAL to LOW (delay prob 99.3% -> 2.9%), saving an estimated ~102 days across compensation and possession milestones."
+    }
+  },
+  "GET /api/projects/{project_id}": {
+    "id": "b7e129af-46b6-4a23-8626-5a8c0d3540ca",
+    "project_code": "CBIC-TN-PKG02",
+    "name": "Chennai-Bengaluru Industrial Corridor (CBIC) - Package 2",
+    "district": "Ranipet",
+    "state": "Tamil Nadu",
+    "project_type": "Industrial / Expressway",
+    "land_area_hectares": 340.5,
+    "affected_families_count": 420,
+    "status": "delayed",
+    "risk_category": "critical",
+    "delay_probability": 0.9935,
+    "stage_delay_probabilities": {
+      "survey": 0.32,
+      "possession": 0.85,
+      "compensation": 0.88,
+      "notification": 0.05,
+      "rehabilitation": 0.62
+    },
+    "predicted_delay_days": 145,
+    "confidence_score": 0.8702,
+    "computed_at": "2026-09-05T14:10:26.135463+00:00"
+  },
+  "GET /api/projects (Item in list)": {
+    "id": "b7e129af-46b6-4a23-8626-5a8c0d3540ca",
+    "project_code": "CBIC-TN-PKG02",
+    "name": "Chennai-Bengaluru Industrial Corridor (CBIC) - Package 2",
+    "district": "Ranipet",
+    "state": "Tamil Nadu",
+    "project_type": "Industrial / Expressway",
+    "risk_category": "critical",
+    "delay_probability": 0.9935,
+    "computed_at": "2026-09-05T14:10:26.173491Z"
+  },
+  "GET /api/districts/summary (Ranipet)": {
+    "state": "Tamil Nadu",
+    "district": "Ranipet",
+    "project_count": 59,
+    "avg_delay_probability": 0.3063,
+    "high_risk_count": 6,
+    "critical_risk_count": 8
+  },
+  "GET /api/alerts (Alert for CBIC)": {
+    "id": "b7e129af-46b6-4a23-8626-5a8c0d3540ca",
+    "project_code": "CBIC-TN-PKG02",
+    "name": "Chennai-Bengaluru Industrial Corridor (CBIC) - Package 2",
+    "district": "Ranipet",
+    "state": "Tamil Nadu",
+    "project_type": "Industrial / Expressway",
+    "risk_category": "critical",
+    "delay_probability": 0.9935,
+    "land_area_hectares": 340.5,
+    "affected_families_count": 420,
+    "computed_at": "2026-09-05T14:10:26.337981Z"
+  }
+}

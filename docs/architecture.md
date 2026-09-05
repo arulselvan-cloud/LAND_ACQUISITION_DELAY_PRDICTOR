@@ -47,3 +47,10 @@
    - Explainable AI (SHAP value breakdown for administrative stakeholders)
 3. **API Service (`backend/`)**: FastAPI endpoints for spatial querying, prediction serving, and simulation.
 4. **Interactive Dashboard (`frontend/`)**: React-based geospatial interface with heatmaps and actionable intervention insights.
+
+## Known Limitations
+
+- **Authentication and Role-Based Access Control (RBAC)**: Explicitly identified in SIH26017's problem statement, authentication and multi-tier role-based access control are not implemented in this prototype due to hackathon time constraints. In a production enterprise deployment, role-based access control would be established with dedicated access tiers for:
+  1. **District Administration**: Field-level data updates, survey milestone logging, and parcel dispute resolutions.
+  2. **State Governments**: State-wide cross-project monitoring, compensation disbursement oversight, and inter-departmental clearances.
+  3. **Central Ministries**: National oversight dashboard, infrastructure corridor bottleneck tracking, and macro capital allocation.

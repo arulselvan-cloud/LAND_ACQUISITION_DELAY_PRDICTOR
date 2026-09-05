@@ -18,8 +18,16 @@ ml_dir = Path(__file__).resolve().parent
 root_dir = ml_dir.parent
 sys.path.insert(0, str(root_dir))
 
+from sqlalchemy.orm import Session
+
 from backend.app.database import SessionLocal
-from backend.app.models import Project, RiskCategoryEnum, RiskScore
+from backend.app.models import (
+    Project,
+    RiskCategoryEnum,
+    RiskScore,
+    Stage,
+    StageStatusEnum,
+)
 from ml.features import (
     ALL_FEATURE_COLUMNS,
     CATEGORICAL_FEATURES,
@@ -31,31 +39,49 @@ from ml.features import (
 from ml.train_survival import predict_expected_delay
 
 
-def what_if(project_id: str, hypothetical_changes: Dict[str, Any]) -> Dict:
+def what_if(
+    project_id: str,
+    hypothetical_changes: Dict[str, Any],
+    session: Optional[Session] = None,
+    classifier_bundle: Optional[Dict] = None,
+    survival_comp_bundle: Optional[Dict] = None,
+    survival_poss_bundle: Optional[Dict] = None,
+) -> Dict:
     """Computes counterfactual predictions given hypothetical interventions for a project.
     
     Args:
-        project_id: UUID string of target project.
+        project_id: UUID string or project_code of target project.
         hypothetical_changes: Dictionary of features to mutate, e.g.
             {
                 "compensation_disbursed_pct": 85.0,
                 "has_active_legal_dispute": 0,
                 "avg_stakeholder_responsiveness": 78.5
             }
+        session: Optional SQLAlchemy Session.
+        classifier_bundle: Optional pre-loaded classifier bundle.
+        survival_comp_bundle: Optional pre-loaded compensation survival model bundle.
+        survival_poss_bundle: Optional pre-loaded possession survival model bundle.
             
     Returns:
         Structured dictionary comparing baseline vs counterfactual outcomes.
     """
-    model_bundle_path = ml_dir / "models" / "risk_classifier.joblib"
-    if not model_bundle_path.exists():
-        raise FileNotFoundError(f"Classifier model not found at {model_bundle_path}. Run ml/train_classifier.py first.")
+    if classifier_bundle is not None:
+        bundle = classifier_bundle
+    else:
+        model_bundle_path = ml_dir / "models" / "risk_classifier.joblib"
+        if not model_bundle_path.exists():
+            raise FileNotFoundError(f"Classifier model not found at {model_bundle_path}. Run ml/train_classifier.py first.")
+        bundle = joblib.load(model_bundle_path)
 
-    bundle = joblib.load(model_bundle_path)
     model = bundle["model"]
     encoders = bundle["encoders"]
     inv_label_map = bundle["inv_label_map"]
 
-    session = SessionLocal()
+    close_session = False
+    if session is None:
+        session = SessionLocal()
+        close_session = True
+
     try:
         # 1. Fetch baseline feature vector
         base_df = get_project_feature_vector(project_id, encoders, session=session)
@@ -71,9 +97,37 @@ def what_if(project_id: str, hypothetical_changes: Dict[str, Any]) -> Dict:
         base_delay_prob = float(base_probs[2] + base_probs[3])
 
         # Baseline expected delay in compensation and possession stages
-        base_comp_delay = predict_expected_delay(project_id, "compensation", session=session)
-        base_poss_delay = predict_expected_delay(project_id, "possession", session=session)
+        base_comp_delay = predict_expected_delay(
+            project_id, "compensation", session=session, model_bundle=survival_comp_bundle
+        )
+        base_poss_delay = predict_expected_delay(
+            project_id, "possession", session=session, model_bundle=survival_poss_bundle
+        )
         base_total_delay = base_comp_delay + base_poss_delay
+
+        # Fetch actual delay accumulated so far from the stages table (same source as /propagation)
+        from uuid import UUID
+        proj_obj = None
+        try:
+            p_uuid = UUID(project_id) if isinstance(project_id, str) else project_id
+            proj_obj = session.query(Project).filter_by(id=p_uuid).first()
+        except (ValueError, AttributeError):
+            pass
+        if not proj_obj:
+            proj_obj = session.query(Project).filter_by(project_code=project_id).first()
+
+        actual_delay_so_far = 0
+        if proj_obj:
+            stages = (
+                session.query(Stage)
+                .filter_by(project_id=proj_obj.id)
+                .order_by(Stage.stage_order.asc())
+                .all()
+            )
+            for stg in stages:
+                if stg.status == StageStatusEnum.not_started:
+                    break
+                actual_delay_so_far += int(stg.delay_days or 0)
 
         # 2. Construct Counterfactual feature vector
         cf_features = base_features.copy()
@@ -96,10 +150,10 @@ def what_if(project_id: str, hypothetical_changes: Dict[str, Any]) -> Dict:
 
         # Counterfactual expected delay in survival stages
         cf_comp_delay = predict_expected_delay(
-            project_id, "compensation", override_features=cf_features, session=session
+            project_id, "compensation", override_features=cf_features, session=session, model_bundle=survival_comp_bundle
         )
         cf_poss_delay = predict_expected_delay(
-            project_id, "possession", override_features=cf_features, session=session
+            project_id, "possession", override_features=cf_features, session=session, model_bundle=survival_poss_bundle
         )
         cf_total_delay = cf_comp_delay + cf_poss_delay
 
@@ -116,10 +170,11 @@ def what_if(project_id: str, hypothetical_changes: Dict[str, Any]) -> Dict:
             "baseline": {
                 "risk_category": base_cat,
                 "delay_probability": round(base_delay_prob, 4),
+                "actual_delay_so_far_days": actual_delay_so_far,
                 "expected_delay_days": base_total_delay,
                 "stage_breakdown": {
-                    "compensation_delay_days": base_comp_delay,
-                    "possession_delay_days": base_poss_delay,
+                    "additional_expected_compensation_delay_days": base_comp_delay,
+                    "additional_expected_possession_delay_days": base_poss_delay,
                 },
                 "class_probabilities": {
                     inv_label_map[i]: round(float(base_probs[i]), 4) for i in range(len(base_probs))
@@ -130,8 +185,8 @@ def what_if(project_id: str, hypothetical_changes: Dict[str, Any]) -> Dict:
                 "delay_probability": round(cf_delay_prob, 4),
                 "expected_delay_days": cf_total_delay,
                 "stage_breakdown": {
-                    "compensation_delay_days": cf_comp_delay,
-                    "possession_delay_days": cf_poss_delay,
+                    "additional_expected_compensation_delay_days": cf_comp_delay,
+                    "additional_expected_possession_delay_days": cf_poss_delay,
                 },
                 "class_probabilities": {
                     inv_label_map[i]: round(float(cf_probs[i]), 4) for i in range(len(cf_probs))

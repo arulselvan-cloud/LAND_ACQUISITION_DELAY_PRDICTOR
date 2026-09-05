@@ -203,10 +203,18 @@ def get_project_feature_vector(
 
     try:
         from uuid import UUID
-        proj_uuid = UUID(project_id) if isinstance(project_id, str) else project_id
-        proj = session.query(Project).filter_by(id=proj_uuid).first()
+        proj = None
+        try:
+            proj_uuid = UUID(project_id) if isinstance(project_id, str) else project_id
+            proj = session.query(Project).filter_by(id=proj_uuid).first()
+        except (ValueError, AttributeError):
+            pass
+
         if not proj:
-            raise ValueError(f"Project with ID {project_id} not found.")
+            proj = session.query(Project).filter_by(project_code=project_id).first()
+
+        if not proj:
+            raise ValueError(f"Project with ID or code '{project_id}' not found.")
 
         # Extract features
         comp = session.query(CompensationRecord).filter_by(project_id=proj.id).first()
