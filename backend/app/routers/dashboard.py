@@ -206,7 +206,9 @@ def list_projects(
     if risk_category:
         try:
             cat_enum = RiskCategoryEnum(risk_category.strip().lower())
-            query = query.filter(RiskScore.risk_category == cat_enum)
+            query = query.filter(
+                func.coalesce(RiskScore.predicted_risk_category, RiskScore.risk_category) == cat_enum
+            )
         except ValueError:
             raise HTTPException(
                 status_code=422,
@@ -364,15 +366,15 @@ def get_risk_alerts(
 
     total_alerts = (
         db.query(RiskScore)
-        .filter(RiskScore.risk_category.in_(high_risk_cats))
+        .filter(func.coalesce(RiskScore.predicted_risk_category, RiskScore.risk_category).in_(high_risk_cats))
         .count()
     )
 
     records = (
         db.query(Project, RiskScore)
         .join(RiskScore, Project.id == RiskScore.project_id)
-        .filter(RiskScore.risk_category.in_(high_risk_cats))
-        .order_by(desc(RiskScore.overall_delay_probability))
+        .filter(func.coalesce(RiskScore.predicted_risk_category, RiskScore.risk_category).in_(high_risk_cats))
+        .order_by(desc(func.coalesce(RiskScore.predicted_delay_probability, RiskScore.overall_delay_probability)))
         .limit(limit)
         .all()
     )
@@ -389,8 +391,9 @@ def get_risk_alerts(
             prob = live_preds[pid_str]["delay_probability"]
             computed_at = live_preds[pid_str]["computed_at"]
         else:
-            cat_str = stored_risk.risk_category.value
-            prob = float(stored_risk.overall_delay_probability)
+            cat_enum = stored_risk.predicted_risk_category or stored_risk.risk_category
+            cat_str = cat_enum.value if cat_enum else "unassessed"
+            prob = float(stored_risk.predicted_delay_probability or stored_risk.overall_delay_probability or 0.0)
             computed_at = stored_risk.computed_at
 
         alerts.append(
@@ -416,3 +419,66 @@ def get_risk_alerts(
         total_alerts=total_alerts,
         alerts=alerts,
     )
+
+
+class OverviewSummaryResponse(BaseModel):
+    total_projects: int
+    high_critical_count: int
+    low_risk_count: int
+    medium_risk_count: int
+    high_risk_count: int
+    critical_risk_count: int
+    avg_delay_probability: float
+    total_land_area_hectares: float
+    total_affected_families: int
+    risk_breakdown: Dict[str, int]
+
+
+@router.get("/summary", response_model=OverviewSummaryResponse)
+def get_executive_summary(db: Session = Depends(get_db)):
+    """Provides high-level system metrics and risk distribution for the executive overview cards and donut chart."""
+    total_projects = db.query(Project).count()
+
+    pred_col = func.coalesce(RiskScore.predicted_risk_category, RiskScore.risk_category)
+    counts = dict(
+        db.query(pred_col, func.count(RiskScore.id))
+        .group_by(pred_col)
+        .all()
+    )
+
+    low_cnt = counts.get(RiskCategoryEnum.low, 0)
+    med_cnt = counts.get(RiskCategoryEnum.medium, 0)
+    high_cnt = counts.get(RiskCategoryEnum.high, 0)
+    crit_cnt = counts.get(RiskCategoryEnum.critical, 0)
+    high_crit_cnt = high_cnt + crit_cnt
+
+    avg_prob = db.query(
+        func.avg(func.coalesce(RiskScore.predicted_delay_probability, RiskScore.overall_delay_probability))
+    ).scalar() or 0.0
+
+    totals = db.query(
+        func.sum(Project.land_area_hectares),
+        func.sum(Project.affected_families_count),
+    ).first()
+
+    tot_area = float(totals[0] or 0.0)
+    tot_paf = int(totals[1] or 0)
+
+    return OverviewSummaryResponse(
+        total_projects=total_projects,
+        high_critical_count=high_crit_cnt,
+        low_risk_count=low_cnt,
+        medium_risk_count=med_cnt,
+        high_risk_count=high_cnt,
+        critical_risk_count=crit_cnt,
+        avg_delay_probability=round(float(avg_prob), 4),
+        total_land_area_hectares=round(tot_area, 2),
+        total_affected_families=tot_paf,
+        risk_breakdown={
+            "Low": low_cnt,
+            "Medium": med_cnt,
+            "High": high_cnt,
+            "Critical": crit_cnt,
+        },
+    )
+

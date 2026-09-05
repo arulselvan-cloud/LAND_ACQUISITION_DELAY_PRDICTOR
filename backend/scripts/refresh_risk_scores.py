@@ -73,7 +73,9 @@ def refresh_all_risk_scores():
 
             risk_rec = existing_scores.get(pid_str)
             if risk_rec:
-                risk_rec.risk_category = cat_enum
+                # SAFE: Never mutate ground truth risk_category
+                risk_rec.predicted_risk_category = cat_enum
+                risk_rec.predicted_delay_probability = round(delay_prob, 4)
                 risk_rec.overall_delay_probability = round(delay_prob, 4)
                 risk_rec.confidence_score = round(conf, 4)
                 risk_rec.computed_at = now
@@ -82,6 +84,8 @@ def refresh_all_risk_scores():
                 new_rec = RiskScore(
                     project_id=row["project_id"],
                     risk_category=cat_enum,
+                    predicted_risk_category=cat_enum,
+                    predicted_delay_probability=round(delay_prob, 4),
                     overall_delay_probability=round(delay_prob, 4),
                     confidence_score=round(conf, 4),
                     stage_delay_probabilities={},
@@ -100,8 +104,9 @@ def refresh_all_risk_scores():
         if cbic_proj:
             cbic_risk = session.query(RiskScore).filter_by(project_id=cbic_proj.id).first()
             print("\nVerification for [CBIC-TN-PKG02]:")
-            print(f"  Risk Category:    {cbic_risk.risk_category.value}")
-            print(f"  Delay Probability: {cbic_risk.overall_delay_probability:.4f}")
+            print(f"  Ground Truth Cat: {cbic_risk.risk_category.value}")
+            print(f"  Predicted Cat:    {cbic_risk.predicted_risk_category.value if cbic_risk.predicted_risk_category else 'N/A'}")
+            print(f"  Predicted Prob:   {cbic_risk.predicted_delay_probability}")
             print(f"  Confidence:       {cbic_risk.confidence_score:.4f}")
             print(f"  Computed At:      {cbic_risk.computed_at}")
     finally:

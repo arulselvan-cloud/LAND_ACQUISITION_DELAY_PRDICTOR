@@ -162,7 +162,7 @@
     },
     "predicted_delay_days": 145,
     "confidence_score": 0.8702,
-    "computed_at": "2026-09-05T14:10:26.135463+00:00"
+    "computed_at": "2026-09-05T16:17:26.929709+00:00"
   },
   "GET /api/projects (Item in list)": {
     "id": "b7e129af-46b6-4a23-8626-5a8c0d3540ca",
@@ -173,14 +173,14 @@
     "project_type": "Industrial / Expressway",
     "risk_category": "critical",
     "delay_probability": 0.9935,
-    "computed_at": "2026-09-05T14:10:26.173491Z"
+    "computed_at": "2026-09-05T16:17:26.972276Z"
   },
   "GET /api/districts/summary (Ranipet)": {
     "state": "Tamil Nadu",
     "district": "Ranipet",
     "project_count": 59,
     "avg_delay_probability": 0.3063,
-    "high_risk_count": 6,
+    "high_risk_count": 10,
     "critical_risk_count": 8
   },
   "GET /api/alerts (Alert for CBIC)": {
@@ -194,6 +194,6 @@
     "delay_probability": 0.9935,
     "land_area_hectares": 340.5,
     "affected_families_count": 420,
-    "computed_at": "2026-09-05T14:10:26.337981Z"
+    "computed_at": "2026-09-05T16:17:27.317802Z"
   }
 }

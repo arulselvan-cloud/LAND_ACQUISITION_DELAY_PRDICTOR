@@ -33,6 +33,13 @@ class RiskScore(Base, TimestampDataSourceMixin):
         nullable=False,
         index=True,
     )
+    predicted_risk_category = Column(
+        SAEnum(RiskCategoryEnum, name="risk_category_enum", native_enum=True),
+        nullable=True,
+        index=True,
+    )
+    predicted_delay_probability = Column(Float, nullable=True)
+    raw_risk_score = Column(Float, nullable=True)
     overall_delay_probability = Column(Float, nullable=False)
     # Stage breakdown: {"notification": 0.12, "survey": 0.25, "compensation": 0.65, "possession": 0.82, "rehabilitation": 0.45}
     stage_delay_probabilities = Column(JSONB, nullable=False)

@@ -541,6 +541,7 @@ def build_full_record(feat: dict, risk_cat: RiskCategoryEnum, today: datetime.da
 
     risk_data = {
         "risk_category": risk_cat,
+        "raw_risk_score": round(float(raw_score), 6),
         "overall_delay_probability": overall_prob,
         "stage_delay_probabilities": stage_probs,
         "predicted_delay_days": total_delay_days,
@@ -822,6 +823,7 @@ def generate_and_insert(count: int = 3500, batch_size: int = 500, seed: int = 42
                 id=risk_id,
                 project_id=proj_id,
                 risk_category=rs["risk_category"],
+                raw_risk_score=rs["raw_risk_score"],
                 overall_delay_probability=rs["overall_delay_probability"],
                 stage_delay_probabilities=rs["stage_delay_probabilities"],
                 predicted_delay_days=rs["predicted_delay_days"],
@@ -836,8 +838,8 @@ def generate_and_insert(count: int = 3500, batch_size: int = 500, seed: int = 42
             stage_probs_json = json.dumps(rs["stage_delay_probabilities"]).replace("'", "''")
             top_drivers_json = json.dumps(rs["top_risk_drivers"]).replace("'", "''")
             sql_batch.append(
-                f"INSERT INTO risk_scores (id, created_at, updated_at, data_source, project_id, risk_category, overall_delay_probability, stage_delay_probabilities, predicted_delay_days, confidence_score, top_risk_drivers, computed_at) "
-                f"VALUES ('{risk_id}', now(), now(), 'synthetic', '{proj_id}', '{rs['risk_category'].value}', {rs['overall_delay_probability']}, '{stage_probs_json}'::jsonb, {rs['predicted_delay_days']}, {rs['confidence_score']}, '{top_drivers_json}'::jsonb, '{rs['computed_at']}');"
+                f"INSERT INTO risk_scores (id, created_at, updated_at, data_source, project_id, risk_category, raw_risk_score, overall_delay_probability, stage_delay_probabilities, predicted_delay_days, confidence_score, top_risk_drivers, computed_at) "
+                f"VALUES ('{risk_id}', now(), now(), 'synthetic', '{proj_id}', '{rs['risk_category'].value}', {rs['raw_risk_score']}, {rs['overall_delay_probability']}, '{stage_probs_json}'::jsonb, {rs['predicted_delay_days']}, {rs['confidence_score']}, '{top_drivers_json}'::jsonb, '{rs['computed_at']}');"
             )
 
             delay_days_list.append(rec["total_delay_days"])
