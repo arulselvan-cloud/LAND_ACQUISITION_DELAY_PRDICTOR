@@ -12,7 +12,10 @@ import {
   ArrowRight,
   TrendingDown,
   Clock,
-  Scale
+  Scale,
+  Sparkles,
+  RefreshCw,
+  FileText
 } from 'lucide-react';
 import {
   BarChart,
@@ -28,7 +31,9 @@ import {
   getProjectExplanation,
   getProjectPropagation,
   simulateWhatIf,
-  getProjectDetails
+  getProjectDetails,
+  generateProjectRecommendation,
+  getProjectRecommendations
 } from '../api/client';
 
 export default function ProjectDetail({
@@ -49,28 +54,43 @@ export default function ProjectDetail({
   const [stakeholderResp, setStakeholderResp] = useState(50);
   const [activeDispute, setActiveDispute] = useState(0);
 
+  // Recommendations and AI memo states
+  const [recommendations, setRecommendations] = useState([]);
+  const [aiMemo, setAiMemo] = useState(null);
+  const [generatingRec, setGeneratingRec] = useState(false);
+  const [recError, setRecError] = useState(null);
+
   const debounceTimerRef = useRef(null);
 
-  // Load project data and initial predictions
+  // Load project data, initial predictions, and recommendations
   useEffect(() => {
     if (!projectId) return;
 
     let isMounted = true;
     setLoading(true);
     setError(null);
+    setRecError(null);
 
     Promise.all([
       getProjectDetails(projectId),
       predictProject(projectId),
       getProjectExplanation(projectId),
-      getProjectPropagation(projectId)
+      getProjectPropagation(projectId),
+      getProjectRecommendations(projectId).catch(() => ({ recommendations: [] }))
     ])
-      .then(([projData, predData, expData, propData]) => {
+      .then(([projData, predData, expData, propData, recsData]) => {
         if (!isMounted) return;
         setProject(projData);
         setPrediction(predData);
         setExplanation(expData);
         setPropagation(propData);
+
+        const recList = recsData?.recommendations || [];
+        setRecommendations(recList);
+        const execDirective = recList.find(r => r.category === 'Executive Directive');
+        if (execDirective) {
+          setAiMemo(execDirective.action_text);
+        }
 
         // Find initial feature values for what-if sliders
         const compDriver = expData.factors.find(f => f.feature === 'compensation_disbursed_pct');
@@ -109,6 +129,22 @@ export default function ProjectDetail({
       if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
     };
   }, [projectId]);
+
+  // Triggers Gemini 2.5 Flash administrative memo and recommendations generation
+  const handleGenerateRecommendation = async (simulateFailure = false) => {
+    setGeneratingRec(true);
+    setRecError(null);
+    try {
+      const res = await generateProjectRecommendation(projectId, simulateFailure);
+      setAiMemo(res.memo);
+      setRecommendations(res.recommendations || []);
+    } catch (err) {
+      console.error('Failed to generate recommendation:', err);
+      setRecError(err.message || 'Failed to generate administrative action plan.');
+    } finally {
+      setGeneratingRec(false);
+    }
+  };
 
   // Debounced what-if counterfactual trigger on slider change
   const triggerWhatIf = (newComp, newResp, newDispute) => {
@@ -484,6 +520,111 @@ export default function ProjectDetail({
                         {whatIfData.impact.summary}
                       </div>
                     </div>
+                  </div>
+                )}
+              </div>
+
+              {/* STAGE 6: Recommended Actions & AI Policy Memo */}
+              <div className="story-section" style={{ borderLeftColor: 'var(--gov-blue)' }}>
+                <div className="story-section-title" style={{ justifyContent: 'space-between', width: '100%', flexWrap: 'wrap', gap: '8px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span className="story-stage-num" style={{ background: 'var(--gov-navy)' }}>Action</span>
+                    <Sparkles size={16} style={{ color: 'var(--gov-blue)' }} />
+                    <span>Recommended Administrative Directives & AI Action Memo</span>
+                  </div>
+                  <button
+                    onClick={() => handleGenerateRecommendation(false)}
+                    disabled={generatingRec}
+                    className="btn-primary"
+                    style={{
+                      fontSize: '0.75rem',
+                      padding: '5px 12px',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      cursor: generatingRec ? 'not-allowed' : 'pointer',
+                    }}
+                  >
+                    <RefreshCw size={13} className={generatingRec ? 'spin' : ''} />
+                    {generatingRec ? 'Generating AI Directive...' : (aiMemo ? 'Regenerate Action Plan' : 'Generate Action Plan')}
+                  </button>
+                </div>
+
+                <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '16px' }}>
+                  Prescriptive administrative guidance synthesized from SHAP explainability drivers and RFCTLARR 2013 statutory frameworks using Google Gemini 2.5 Flash.
+                </p>
+
+                {recError && (
+                  <div className="error-banner" style={{ marginBottom: '14px', fontSize: '0.8rem' }}>
+                    {recError}
+                  </div>
+                )}
+
+                {/* AI Executive Action Memo */}
+                {aiMemo && (
+                  <div className="ai-memo-container">
+                    <div className="ai-memo-header">
+                      <div className="ai-memo-tag">
+                        <Sparkles size={14} style={{ color: 'var(--gov-blue)' }} />
+                        <span>Executive Administrative Directive (Gemini 2.5 Flash)</span>
+                      </div>
+                      <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
+                        Authority: District Collector & SLAO
+                      </span>
+                    </div>
+                    <p className="ai-memo-text">{aiMemo}</p>
+                  </div>
+                )}
+
+                {/* Actionable Directives List */}
+                {recommendations && recommendations.filter(r => r.category !== 'Executive Directive').length > 0 ? (
+                  <div>
+                    <div style={{ fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      <FileText size={14} />
+                      <span>Statutory Administrative Directives</span>
+                    </div>
+                    <div className="rec-actions-list">
+                      {recommendations
+                        .filter(r => r.category !== 'Executive Directive')
+                        .map((rec) => {
+                          const priorityClass = (rec.priority || 'medium').toLowerCase();
+                          return (
+                            <div key={rec.id || rec.action_text} className="rec-action-item">
+                              <div className="rec-action-top">
+                                <span className="rec-category-tag">{rec.category || 'General Administrative'}</span>
+                                <span className={`priority-badge ${priorityClass}`}>
+                                  {rec.priority}
+                                </span>
+                              </div>
+                              <div className="rec-action-title">{rec.action_text}</div>
+                              {rec.expected_impact && (
+                                <div className="rec-action-impact">
+                                  <strong style={{ color: 'var(--gov-navy)' }}>Expected Impact:</strong> {rec.expected_impact}
+                                </div>
+                              )}
+                            </div>
+                          );
+                        })}
+                    </div>
+                  </div>
+                ) : !aiMemo && (
+                  <div style={{ textAlign: 'center', padding: '24px 16px', background: '#f8fafc', borderRadius: 'var(--radius-md)', border: '1px dashed #cbd5e1' }}>
+                    <Sparkles size={24} style={{ color: 'var(--gov-blue)', margin: '0 auto 8px', display: 'block' }} />
+                    <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '4px' }}>
+                      No Action Plan Generated Yet
+                    </div>
+                    <div style={{ fontSize: '0.78rem', color: 'var(--text-muted)', maxWidth: '420px', margin: '0 auto 12px' }}>
+                      Synthesize an actionable administrative memo and prioritized directives tailored to this project's SHAP risk drivers.
+                    </div>
+                    <button
+                      onClick={() => handleGenerateRecommendation(false)}
+                      disabled={generatingRec}
+                      className="btn-primary"
+                      style={{ fontSize: '0.8rem', padding: '6px 16px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+                    >
+                      <Sparkles size={14} />
+                      {generatingRec ? 'Synthesizing with Gemini 2.5 Flash...' : 'Generate Action Plan Now'}
+                    </button>
                   </div>
                 )}
               </div>

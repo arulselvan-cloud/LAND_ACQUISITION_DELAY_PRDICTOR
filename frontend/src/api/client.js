@@ -174,3 +174,21 @@ export async function getExecutiveSummary() {
 export async function getHealthCheck() {
   return request('/health');
 }
+
+/**
+ * Triggers AI recommendation and executive action memo generation (Gemini 2.5 Flash).
+ */
+export async function generateProjectRecommendation(projectId, simulateFailure = false) {
+  const query = simulateFailure ? '?simulate_failure=true' : '';
+  return request(`/projects/${encodeURIComponent(projectId)}/generate-recommendation${query}`, {
+    method: 'POST',
+  });
+}
+
+/**
+ * Retrieves all stored administrative recommendations and action directives for a project.
+ */
+export async function getProjectRecommendations(projectId) {
+  return request(`/projects/${encodeURIComponent(projectId)}/recommendations`);
+}
+

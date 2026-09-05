@@ -1,0 +1,193 @@
+{
+  "CBIC": {
+    "project_id": "b7e129af-46b6-4a23-8626-5a8c0d3540ca",
+    "project_code": "CBIC-TN-PKG02",
+    "name": "Chennai-Bengaluru Industrial Corridor (CBIC) - Package 2",
+    "predicted_risk_category": "critical",
+    "delay_probability": 0.9935,
+    "memo": "The Chennai-Bengaluru Industrial Corridor (CBIC-TN-PKG02) in Ranipet District faces a critical 99.3% delay probability stemming from an active judicial stay order causing a 90-day impact, compounded by the substantial acquisition of 340.5 Ha and grievances concerning 420 Project Affected Families. The District Collector, in close coordination with the Legal Cell, is hereby directed to urgently secure the vacation of the judicial stay, deploy additional revenue surveyor teams for expeditious cadastral boundary demarcation, and convene Special Gram Sabhas to resolve community compensation grievances. These priority actions must be completed within 14-30 days to unblock statutory land vesting, mitigate further legal dispute delays, and ensure compliance with the RFCTLARR, 2013, thereby averting significant project timeline overruns.",
+    "is_llm_generated": true,
+    "fallback_used": false,
+    "model": "gemini-2.5-flash",
+    "recommendations": [
+      {
+        "id": "d12ec2e1-e44d-4df4-acd1-6c3dab00ea8c",
+        "action_text": "The Chennai-Bengaluru Industrial Corridor (CBIC-TN-PKG02) in Ranipet District faces a critical 99.3% delay probability stemming from an active judicial stay order causing a 90-day impact, compounded by the substantial acquisition of 340.5 Ha and grievances concerning 420 Project Affected Families. The District Collector, in close coordination with the Legal Cell, is hereby directed to urgently secure the vacation of the judicial stay, deploy additional revenue surveyor teams for expeditious cadastral boundary demarcation, and convene Special Gram Sabhas to resolve community compensation grievances. These priority actions must be completed within 14-30 days to unblock statutory land vesting, mitigate further legal dispute delays, and ensure compliance with the RFCTLARR, 2013, thereby averting significant project timeline overruns.",
+        "priority": "urgent",
+        "category": "Executive Directive",
+        "expected_impact": "Mitigate statutory milestone delays and unblock inter-agency execution under RFCTLARR 2013",
+        "is_implemented": false,
+        "created_at": "2026-09-05T22:44:11.956151+05:30"
+      },
+      {
+        "id": "57b4c80e-db9f-4956-b79a-b4c10a39848d",
+        "action_text": "Coordinate with Legal Cell to expedite resolution of active stay order / litigation",
+        "priority": "urgent",
+        "category": "Legal & Litigation",
+        "expected_impact": "Vacate judicial stay order or file urgency memo to unblock statutory land vesting",
+        "is_implemented": false,
+        "created_at": "2026-09-05T22:24:32.375092+05:30"
+      },
+      {
+        "id": "8a8156ec-1699-4e3c-9181-bcc7a8f8470d",
+        "action_text": "Deploy additional revenue surveyor teams and DGPS/drone survey units for parcel demarcation",
+        "priority": "medium",
+        "category": "Land Administration & Survey",
+        "expected_impact": "Complete Cadastral boundary demarcation and joint measurement survey (JMS)",
+        "is_implemented": false,
+        "created_at": "2026-09-05T22:24:32.375092+05:30"
+      },
+      {
+        "id": "78acf5e3-71d0-48ab-8dfb-751f03f0f48e",
+        "action_text": "Convene Special Gram Sabha and localized grievance redressal camps for Project Affected Families",
+        "priority": "low",
+        "category": "Public Engagement & Solatium",
+        "expected_impact": "Address community compensation grievances and minimize risk of Section 15 objections",
+        "is_implemented": false,
+        "created_at": "2026-09-05T22:44:11.956151+05:30"
+      }
+    ],
+    "alert_created": false
+  },
+  "MAHSR": {
+    "project_id": "d4342972-891e-4786-96b6-6b9c51621d60",
+    "project_code": "MAHSR-MH-PAL03",
+    "name": "Mumbai-Ahmedabad High Speed Rail (MAHSR) - Palghar Section",
+    "predicted_risk_category": "critical",
+    "delay_probability": 0.9975,
+    "memo": "The Mumbai-Ahmedabad High Speed Rail (MAHSR) Palghar Section (MAHSR-MH-PAL03) faces a critical 99.8% delay probability due to an active court stay order, a projected 180-day legal dispute delay impact, and the substantial 286.4 Ha total acquisition land area for 890 Project Affected Families (PAFs). The Legal Cell is directed to coordinate on an urgent priority basis to vacate the active judicial stay order or file an urgency memo to unblock statutory land vesting, concurrently, the District Collectorate and SLAO must deploy additional revenue surveyor teams and DGPS/drone units for immediate cadastral boundary demarcation and Joint Measurement Survey. These decisive actions are expected to resolve critical bottlenecks within 14-30 days, potentially saving up to 180 days of project delay and facilitating land acquisition under RFCTLARR 2013.",
+    "is_llm_generated": true,
+    "fallback_used": false,
+    "model": "gemini-2.5-flash",
+    "recommendations": [
+      {
+        "id": "b8821c5a-b5c9-419d-9d97-0053e2e3b3f1",
+        "action_text": "The Mumbai-Ahmedabad High Speed Rail (MAHSR) Palghar Section (MAHSR-MH-PAL03) faces a critical 99.8% delay probability due to an active court stay order, a projected 180-day legal dispute delay impact, and the substantial 286.4 Ha total acquisition land area for 890 Project Affected Families (PAFs). The Legal Cell is directed to coordinate on an urgent priority basis to vacate the active judicial stay order or file an urgency memo to unblock statutory land vesting, concurrently, the District Collectorate and SLAO must deploy additional revenue surveyor teams and DGPS/drone units for immediate cadastral boundary demarcation and Joint Measurement Survey. These decisive actions are expected to resolve critical bottlenecks within 14-30 days, potentially saving up to 180 days of project delay and facilitating land acquisition under RFCTLARR 2013.",
+        "priority": "urgent",
+        "category": "Executive Directive",
+        "expected_impact": "Mitigate statutory milestone delays and unblock inter-agency execution under RFCTLARR 2013",
+        "is_implemented": false,
+        "created_at": "2026-09-05T22:44:21.318495+05:30"
+      },
+      {
+        "id": "28301836-dee5-49f9-8dd5-3c224e9005ad",
+        "action_text": "Coordinate with Legal Cell to expedite resolution of active stay order / litigation",
+        "priority": "urgent",
+        "category": "Legal & Litigation",
+        "expected_impact": "Vacate judicial stay order or file urgency memo to unblock statutory land vesting",
+        "is_implemented": false,
+        "created_at": "2026-09-05T22:30:51.212040+05:30"
+      },
+      {
+        "id": "25e94f58-3ac5-4c6d-9650-df5b00094761",
+        "action_text": "Deploy additional revenue surveyor teams and DGPS/drone survey units for parcel demarcation",
+        "priority": "high",
+        "category": "Land Administration & Survey",
+        "expected_impact": "Complete Cadastral boundary demarcation and joint measurement survey (JMS)",
+        "is_implemented": false,
+        "created_at": "2026-09-05T22:30:51.212040+05:30"
+      }
+    ],
+    "alert_created": false
+  },
+  "BSRP": {
+    "project_id": "3f857dce-8775-4cd2-b00a-84af2bb4d3dd",
+    "project_code": "BSRP-KA-CORR04",
+    "name": "Bengaluru Suburban Rail Project (BSRP) - Corridor 4 (Heelalige to Rajanukunte)",
+    "predicted_risk_category": "low",
+    "delay_probability": 0.016,
+    "memo": "Project Bengaluru Suburban Rail Project (BSRP) - Corridor 4 (Heelalige to Rajanukunte) (BSRP-KA-CORR04) in Bengaluru Urban, Karnataka maintains a LOW delay risk profile with steady milestone progression across 128.0 hectares. The District Collector and Special Land Acquisition Officer (SLAO) must immediately continue scheduled compensation disbursements to maintain high clearance rates in direct liaison with the Rail Transit Project Implementation Unit. Initiating this intervention within 14 days is projected to prevent payment backlogs and maintain landholder satisfaction and protect the statutory acquisition timeline under RFCTLARR 2013.",
+    "is_llm_generated": false,
+    "fallback_used": true,
+    "model": "rule-fallback-exception",
+    "recommendations": [
+      {
+        "id": "1a5d0223-0619-4aac-9b3a-768e27cfe170",
+        "action_text": "Project Bengaluru Suburban Rail Project (BSRP) - Corridor 4 (Heelalige to Rajanukunte) (BSRP-KA-CORR04) in Bengaluru Urban, Karnataka maintains a LOW delay risk profile with steady milestone progression across 128.0 hectares. The District Collector and Special Land Acquisition Officer (SLAO) must immediately continue scheduled compensation disbursements to maintain high clearance rates in direct liaison with the Rail Transit Project Implementation Unit. Initiating this intervention within 14 days is projected to prevent payment backlogs and maintain landholder satisfaction and protect the statutory acquisition timeline under RFCTLARR 2013.",
+        "priority": "medium",
+        "category": "Executive Directive",
+        "expected_impact": "Mitigate statutory milestone delays and unblock inter-agency execution under RFCTLARR 2013",
+        "is_implemented": false,
+        "created_at": "2026-09-05T22:44:31.927367+05:30"
+      },
+      {
+        "id": "1f0123cf-754c-4b9d-8892-ea567c4055b7",
+        "action_text": "Continue scheduled compensation disbursements to maintain high clearance rates",
+        "priority": "urgent",
+        "category": "Treasury & Disbursement",
+        "expected_impact": "Prevent payment backlogs and maintain landholder satisfaction",
+        "is_implemented": false,
+        "created_at": "2026-09-05T22:30:58.388175+05:30"
+      },
+      {
+        "id": "02b146b2-b68e-4416-91fe-e70606b3966d",
+        "action_text": "Maintain scheduled milestone cadence and sustain proactive stakeholder engagement",
+        "priority": "high",
+        "category": "Milestone Supervision",
+        "expected_impact": "Maintain positive acquisition momentum toward timely physical land possession",
+        "is_implemented": false,
+        "created_at": "2026-09-05T22:30:58.388175+05:30"
+      },
+      {
+        "id": "f77d4e93-255d-4f8e-8f40-626f65c85a71",
+        "action_text": "Accelerate R&R scheme implementation, review housing/land allotment bottlenecks",
+        "priority": "low",
+        "category": "Resettlement & Rehabilitation",
+        "expected_impact": "Clear Section 31 R&R entitlements to facilitate peaceful physical possession",
+        "is_implemented": false,
+        "created_at": "2026-09-05T22:30:58.388175+05:30"
+      }
+    ],
+    "alert_created": false
+  },
+  "FALLBACK": {
+    "project_id": "b7e129af-46b6-4a23-8626-5a8c0d3540ca",
+    "project_code": "CBIC-TN-PKG02",
+    "name": "Chennai-Bengaluru Industrial Corridor (CBIC) - Package 2",
+    "predicted_risk_category": "critical",
+    "delay_probability": 0.9935,
+    "memo": "Project Chennai-Bengaluru Industrial Corridor (CBIC) - Package 2 (CBIC-TN-PKG02) in Ranipet, Tamil Nadu is evaluated at CRITICAL delay risk (99.3% delay probability), primarily triggered by an active court stay order projected to delay possession by 90 days across 340.5 hectares. The District Collector and Special Land Acquisition Officer (SLAO) must immediately coordinate with legal cell to expedite resolution of active stay order / litigation in direct liaison with the Industrial / Expressway Project Implementation Unit. Initiating this intervention within 14 days is projected to vacate judicial stay order or file urgency memo to unblock statutory land vesting and protect the statutory acquisition timeline under RFCTLARR 2013.",
+    "is_llm_generated": false,
+    "fallback_used": true,
+    "model": "rule-fallback-simulated",
+    "recommendations": [
+      {
+        "id": "94b0359d-d4a8-487e-96fc-6ca8a3873672",
+        "action_text": "Project Chennai-Bengaluru Industrial Corridor (CBIC) - Package 2 (CBIC-TN-PKG02) in Ranipet, Tamil Nadu is evaluated at CRITICAL delay risk (99.3% delay probability), primarily triggered by an active court stay order projected to delay possession by 90 days across 340.5 hectares. The District Collector and Special Land Acquisition Officer (SLAO) must immediately coordinate with legal cell to expedite resolution of active stay order / litigation in direct liaison with the Industrial / Expressway Project Implementation Unit. Initiating this intervention within 14 days is projected to vacate judicial stay order or file urgency memo to unblock statutory land vesting and protect the statutory acquisition timeline under RFCTLARR 2013.",
+        "priority": "urgent",
+        "category": "Executive Directive",
+        "expected_impact": "Mitigate statutory milestone delays and unblock inter-agency execution under RFCTLARR 2013",
+        "is_implemented": false,
+        "created_at": "2026-09-05T22:44:33.222141+05:30"
+      },
+      {
+        "id": "57b4c80e-db9f-4956-b79a-b4c10a39848d",
+        "action_text": "Coordinate with Legal Cell to expedite resolution of active stay order / litigation",
+        "priority": "urgent",
+        "category": "Legal & Litigation",
+        "expected_impact": "Vacate judicial stay order or file urgency memo to unblock statutory land vesting",
+        "is_implemented": false,
+        "created_at": "2026-09-05T22:24:32.375092+05:30"
+      },
+      {
+        "id": "8a8156ec-1699-4e3c-9181-bcc7a8f8470d",
+        "action_text": "Deploy additional revenue surveyor teams and DGPS/drone survey units for parcel demarcation",
+        "priority": "medium",
+        "category": "Land Administration & Survey",
+        "expected_impact": "Complete Cadastral boundary demarcation and joint measurement survey (JMS)",
+        "is_implemented": false,
+        "created_at": "2026-09-05T22:24:32.375092+05:30"
+      },
+      {
+        "id": "78acf5e3-71d0-48ab-8dfb-751f03f0f48e",
+        "action_text": "Convene Special Gram Sabha and localized grievance redressal camps for Project Affected Families",
+        "priority": "low",
+        "category": "Public Engagement & Solatium",
+        "expected_impact": "Address community compensation grievances and minimize risk of Section 15 objections",
+        "is_implemented": false,
+        "created_at": "2026-09-05T22:44:11.956151+05:30"
+      }
+    ],
+    "alert_created": false
+  }
+}

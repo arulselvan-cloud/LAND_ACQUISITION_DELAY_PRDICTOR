@@ -71,6 +71,13 @@ export default function AlertsFeed({
                   </span>
                   <span>{alert.affected_families_count || 0} PAFs</span>
                 </div>
+
+                {alert.recommendation_snippet && (
+                  <div className="alert-rec-snippet">
+                    <span style={{ fontWeight: 700, color: 'var(--gov-blue)', marginRight: '4px' }}>Action:</span>
+                    {alert.recommendation_snippet}
+                  </div>
+                )}
               </div>
             );
           })

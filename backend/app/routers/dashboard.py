@@ -22,6 +22,7 @@ from backend.app.models.enums import DisputeStatusEnum, RiskCategoryEnum
 from backend.app.models.legal import LegalDispute
 from backend.app.models.project import Project
 from backend.app.models.rehabilitation import RehabilitationProgress
+from backend.app.models.recommendation import Recommendation
 from backend.app.models.risk import RiskScore
 from backend.app.models.stakeholder import Stakeholder
 from backend.app.services.project_lookup import get_project_or_404
@@ -72,6 +73,7 @@ class AlertItem(BaseModel):
     delay_probability: float
     land_area_hectares: float
     affected_families_count: int
+    recommendation_snippet: Optional[str] = None
     computed_at: Optional[datetime] = None
 
 
@@ -383,6 +385,26 @@ def get_risk_alerts(
     classifier_bundle = getattr(request.app.state, "risk_classifier", None)
     live_preds = compute_live_predictions_for_projects(projects, classifier_bundle, db)
 
+    # Batch query latest recommendations for these projects
+    proj_ids = [p.id for p in projects]
+    rec_records = (
+        db.query(Recommendation)
+        .filter(Recommendation.project_id.in_(proj_ids))
+        .order_by(Recommendation.created_at.desc())
+        .all()
+    )
+    rec_map: Dict[str, str] = {}
+    for r in rec_records:
+        pid = str(r.project_id)
+        if pid not in rec_map:
+            text = r.action_text.strip()
+            # If executive memo, pick first sentence for clean compact card preview
+            if ". " in text:
+                text = text.split(". ")[0] + "."
+            if len(text) > 130:
+                text = text[:127] + "..."
+            rec_map[pid] = text
+
     alerts = []
     for proj, stored_risk in records:
         pid_str = str(proj.id)
@@ -396,6 +418,15 @@ def get_risk_alerts(
             prob = float(stored_risk.predicted_delay_probability or stored_risk.overall_delay_probability or 0.0)
             computed_at = stored_risk.computed_at
 
+        # Extract or synthesize a crisp recommendation directive
+        rec_snippet = rec_map.get(pid_str)
+        if not rec_snippet:
+            # Fallback heuristic based on project flags
+            if proj.legal_disputes:
+                rec_snippet = "Coordinate with Legal Cell to expedite resolution of active stay order / litigation."
+            else:
+                rec_snippet = "Escalate pending compensation disbursement with District Treasury / SLAO."
+
         alerts.append(
             AlertItem(
                 id=pid_str,
@@ -408,6 +439,7 @@ def get_risk_alerts(
                 delay_probability=round(prob, 4),
                 land_area_hectares=float(proj.land_area_hectares or 0.0),
                 affected_families_count=int(proj.affected_families_count or 0),
+                recommendation_snippet=rec_snippet,
                 computed_at=computed_at,
             )
         )
