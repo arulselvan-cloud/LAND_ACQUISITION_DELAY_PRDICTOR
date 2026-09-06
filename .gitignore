@@ -97,3 +97,7 @@ Thumbs.db
 *.pth
 *.h5
 !ml/models/.gitkeep
+
+# Database backups & local disaster-recovery dumps
+backup_landsight_ai.sql
+*.sql.gz

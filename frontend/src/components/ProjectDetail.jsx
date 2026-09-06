@@ -24,7 +24,8 @@ import {
   YAxis,
   Tooltip,
   ResponsiveContainer,
-  Cell
+  Cell,
+  LabelList
 } from 'recharts';
 import {
   predictProject,
@@ -184,15 +185,56 @@ export default function ProjectDetail({
     triggerWhatIf(compDisbursedPct, stakeholderResp, nextVal);
   };
 
-  // Format SHAP data for horizontal bar chart
-  const shapChartData = (explanation?.factors || []).map((f) => ({
-    name: f.display_name,
-    rawName: f.feature,
-    magnitude: f.magnitude,
-    direction: f.direction,
-    value: f.value,
-    color: f.direction === 'increases_risk' ? '#EF4444' : '#10B981',
-  }));
+  const formatFeatureValue = (feature, val) => {
+    if (val === null || val === undefined) return '';
+    if (feature === 'compensation_disbursed_pct') {
+      return `${Number(val).toFixed(1)}%`;
+    }
+    if (feature === 'rehabilitation_completion_pct') {
+      return `${Number(val).toFixed(1)}%`;
+    }
+    if (feature === 'avg_stakeholder_responsiveness') {
+      return `${Number(val).toFixed(1)} / 100`;
+    }
+    if (feature === 'dispute_delay_impact_days') {
+      return `${Math.round(Number(val))} days`;
+    }
+    if (feature === 'has_active_legal_dispute') {
+      return Number(val) > 0 ? 'Active (Yes)' : '0 (None)';
+    }
+    if (feature === 'land_area_hectares') {
+      return `${Number(val).toFixed(1)} Ha`;
+    }
+    if (feature === 'affected_families_count') {
+      return `${Math.round(Number(val))} PAFs`;
+    }
+    if (feature === 'state_encoded') {
+      return project?.state || `${val}`;
+    }
+    if (feature === 'project_type_encoded') {
+      return project?.project_type || `${val}`;
+    }
+    if (typeof val === 'number') {
+      return Number.isInteger(val) ? `${val}` : Number(val).toFixed(1);
+    }
+    return `${val}`;
+  };
+
+  // Format SHAP data for horizontal bar chart with actual underlying values
+  const shapChartData = (explanation?.factors || []).map((f) => {
+    const rawFormatted = formatFeatureValue(f.feature, f.value);
+    const labelWithVal = rawFormatted ? `${f.display_name} — ${rawFormatted}` : f.display_name;
+    return {
+      name: labelWithVal,
+      displayName: f.display_name,
+      rawName: f.feature,
+      magnitude: f.magnitude,
+      direction: f.direction,
+      value: f.value,
+      formattedValue: rawFormatted,
+      color: f.direction === 'increases_risk' ? '#EF4444' : '#10B981',
+    };
+  });
 
   const totalCumulativeDelay = propagation.reduce((acc, s) => acc + (s.delay_days || 0), 0);
 
@@ -281,30 +323,35 @@ export default function ProjectDetail({
                 </div>
 
                 <p style={{ fontSize: '0.8rem', color: 'var(--text-secondary)', marginBottom: '14px' }}>
-                  TreeExplainer feature attributions for this project. <span style={{ color: '#EF4444', fontWeight: 700 }}>Red bars</span> increase delay risk, while <span style={{ color: '#10B981', fontWeight: 700 }}>green bars</span> accelerate milestone progress.
+                  TreeExplainer feature attributions with actual project values. <span style={{ color: '#EF4444', fontWeight: 700 }}>Red bars</span> increase delay risk, while <span style={{ color: '#10B981', fontWeight: 700 }}>green bars</span> accelerate milestone progress.
                 </p>
 
-                <div style={{ height: '220px', width: '100%' }}>
+                <div style={{ height: '230px', width: '100%' }}>
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart
                       layout="vertical"
                       data={shapChartData}
-                      margin={{ top: 5, right: 30, left: 180, bottom: 5 }}
+                      margin={{ top: 5, right: 60, left: 320, bottom: 5 }}
                     >
                       <XAxis type="number" tick={{ fontSize: 11 }} />
                       <YAxis
                         type="category"
                         dataKey="name"
-                        tick={{ fontSize: 11, fill: 'var(--text-primary)', width: 170 }}
+                        tick={{ fontSize: 11, fill: 'var(--text-primary)', width: 310 }}
                       />
                       <Tooltip
                         formatter={(val, name, item) => [
-                          `${val.toFixed(3)} (${item.payload.direction === 'increases_risk' ? 'Increases Risk' : 'Accelerates Progress'})`,
+                          `${val.toFixed(3)} (${item.payload.direction === 'increases_risk' ? 'Increases Risk' : 'Accelerates Progress'})${item.payload.formattedValue ? ` • Actual Value: ${item.payload.formattedValue}` : ''}`,
                           'Attribution Magnitude'
                         ]}
                         labelFormatter={(lbl) => `Driver: ${lbl}`}
                       />
                       <Bar dataKey="magnitude" radius={[0, 4, 4, 0]}>
+                        <LabelList
+                          dataKey="formattedValue"
+                          position="right"
+                          style={{ fontSize: '11px', fontWeight: 600, fill: 'var(--text-secondary)' }}
+                        />
                         {shapChartData.map((entry, idx) => (
                           <Cell key={`cell-${idx}`} fill={entry.color} />
                         ))}

@@ -228,6 +228,31 @@ SIH PROTOTYPE/
 
 ---
 
-## 9. License
+## 9. Disaster Recovery & Database Backup
+
+LandSight AI includes an instant recovery mechanism to safeguard against accidental data corruption, container crashes, or dataset desynchronization.
+
+### Instant Restore from Backup
+To restore the complete 3,503-project database (including all 3 real showcase projects, 3,500 synthetic projects, 17,500 statutory stages, compensation records, legal disputes, and refreshed ML risk scores):
+
+```bash
+# If using Docker PostGIS container:
+docker exec -i landsight-postgis psql -U landsight_admin -d landsight_ai < backup_landsight_ai.sql
+
+# Or if connecting directly via local psql:
+psql -U landsight_admin -d landsight_ai < backup_landsight_ai.sql
+```
+
+### Regenerating the Database Backup
+> [!IMPORTANT]
+> The backup artifact (`backup_landsight_ai.sql`) is stored in the project root (~10.7 MB). Any time the dataset is intentionally regenerated, calibrated, or updated in the future, regenerate the backup immediately using:
+
+```bash
+docker exec landsight-postgis pg_dump -U landsight_admin landsight_ai > backup_landsight_ai.sql
+```
+
+---
+
+## 10. License
 
 Developed for the **Smart India Hackathon (SIH26017)**. Distributed under the MIT License.

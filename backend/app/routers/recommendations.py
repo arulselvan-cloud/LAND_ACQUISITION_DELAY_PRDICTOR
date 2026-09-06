@@ -112,25 +112,52 @@ def generate_project_recommendation(
         .first()
     )
 
-    # 5. Persist Executive Directive Memo
+    # 5. Persist Executive Directive Memo (upsert to avoid duplicates upon repeated clicks)
     memo_priority = (
         PriorityEnum.urgent
         if pred_cat == "critical"
         else (PriorityEnum.high if pred_cat == "high" else PriorityEnum.medium)
     )
 
-    exec_rec = Recommendation(
-        project_id=proj.id,
-        risk_score_id=latest_risk.id if latest_risk else None,
-        action_text=memo_result["memo"],
-        priority=memo_priority,
-        category="Executive Directive",
-        expected_impact="Mitigate statutory milestone delays and unblock inter-agency execution under RFCTLARR 2013",
-        is_implemented=False,
-        data_source=proj.data_source,
+    existing_exec = (
+        db.query(Recommendation)
+        .filter(
+            Recommendation.project_id == proj.id,
+            Recommendation.category == "Executive Directive",
+        )
+        .order_by(Recommendation.created_at.desc())
+        .first()
     )
-    db.add(exec_rec)
-    db.flush()
+
+    if existing_exec:
+        existing_exec.action_text = memo_result["memo"]
+        existing_exec.priority = memo_priority
+        existing_exec.risk_score_id = latest_risk.id if latest_risk else None
+        existing_exec.is_implemented = False
+        exec_rec = existing_exec
+        # Purge any redundant duplicate Executive Directives for this project
+        (
+            db.query(Recommendation)
+            .filter(
+                Recommendation.project_id == proj.id,
+                Recommendation.category == "Executive Directive",
+                Recommendation.id != existing_exec.id,
+            )
+            .delete(synchronize_session=False)
+        )
+    else:
+        exec_rec = Recommendation(
+            project_id=proj.id,
+            risk_score_id=latest_risk.id if latest_risk else None,
+            action_text=memo_result["memo"],
+            priority=memo_priority,
+            category="Executive Directive",
+            expected_impact="Mitigate statutory milestone delays and unblock inter-agency execution under RFCTLARR 2013",
+            is_implemented=False,
+            data_source=proj.data_source,
+        )
+        db.add(exec_rec)
+        db.flush()
 
     # 6. Persist Rule-Based Directives if not already present
     persisted_recs = [exec_rec]
@@ -159,7 +186,7 @@ def generate_project_recommendation(
         else:
             persisted_recs.append(existing)
 
-    # 7. Automatic Alert Trigger for High / Critical Risk Projects
+    # 7. Automatic Alert Trigger for High / Critical Risk Projects (avoid duplicate unresolved alerts)
     alert_created = False
     if pred_cat in ["high", "critical"]:
         existing_alert = (
@@ -182,6 +209,14 @@ def generate_project_recommendation(
             )
             db.add(new_alert)
             alert_created = True
+        else:
+            # Update existing unresolved alert's message and severity
+            existing_alert.message = memo_result["memo"][:240] + "..."
+            existing_alert.severity = (
+                AlertSeverityEnum.critical
+                if pred_cat == "critical"
+                else AlertSeverityEnum.high
+            )
 
     db.commit()
 
