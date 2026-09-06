@@ -140,6 +140,17 @@ def what_if(
             elif f"{k}_encoded" in cf_features:
                 cf_features[f"{k}_encoded"] = v
 
+        # Domain safety net: if has_active_legal_dispute is explicitly set to 0
+        # and dispute_delay_impact_days is NOT provided in the request,
+        # automatically default dispute_delay_impact_days to 0 rather than silently
+        # keeping the baseline's original value. This prevents contradictory feature vectors.
+        if (
+            "has_active_legal_dispute" in hypothetical_changes
+            and float(hypothetical_changes["has_active_legal_dispute"]) == 0.0
+            and "dispute_delay_impact_days" not in hypothetical_changes
+        ):
+            cf_features["dispute_delay_impact_days"] = 0.0
+
         cf_df = pd.DataFrame([cf_features])[ALL_FEATURE_COLUMNS]
 
         # Counterfactual predictions

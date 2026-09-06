@@ -471,10 +471,10 @@ def get_executive_summary(db: Session = Depends(get_db)):
     """Provides high-level system metrics and risk distribution for the executive overview cards and donut chart."""
     total_projects = db.query(Project).count()
 
-    pred_col = func.coalesce(RiskScore.predicted_risk_category, RiskScore.risk_category)
+    # Use ground truth risk_category for baseline risk distribution
     counts = dict(
-        db.query(pred_col, func.count(RiskScore.id))
-        .group_by(pred_col)
+        db.query(RiskScore.risk_category, func.count(RiskScore.id))
+        .group_by(RiskScore.risk_category)
         .all()
     )
 

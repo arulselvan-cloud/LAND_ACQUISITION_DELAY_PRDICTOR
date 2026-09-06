@@ -193,8 +193,8 @@ export default function DistrictHeatmap({
             style={{ height: '100%', width: '100%', background: '#E2E8F0' }}
           >
             <TileLayer
-              attribution='&copy; <a href="https://carto.com/">CARTO</a>'
-              url="https://{s}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}{r}.png"
+              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+              url="https://tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
             {geoData && (
               <GeoJSON

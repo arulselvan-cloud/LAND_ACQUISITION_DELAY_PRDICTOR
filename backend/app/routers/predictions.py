@@ -202,6 +202,11 @@ def simulate_counterfactual_interventions(
     if not changes:
         raise HTTPException(status_code=422, detail="At least one valid feature intervention must be provided.")
 
+    # Domain safety net: if has_active_legal_dispute is explicitly set to 0 and dispute_delay_impact_days is not provided,
+    # automatically default dispute_delay_impact_days to 0 rather than silently keeping baseline's original value.
+    if changes.get("has_active_legal_dispute") == 0 and "dispute_delay_impact_days" not in changes:
+        changes["dispute_delay_impact_days"] = 0
+
     classifier_bundle = getattr(request.app.state, "risk_classifier", None)
     comp_bundle = getattr(request.app.state, "survival_compensation", None)
     poss_bundle = getattr(request.app.state, "survival_possession", None)
