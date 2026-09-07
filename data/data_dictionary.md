@@ -1,6 +1,6 @@
-# LandSight AI - Data Dictionary
+# Land Acquisition Delay Predictor - Data Dictionary
 
-Comprehensive data dictionary for all relational tables, geometry columns, enums, and metrics in the **LandSight AI** PostgreSQL + PostGIS platform.
+Comprehensive data dictionary for all relational tables, geometry columns, enums, and metrics in the **Land Acquisition Delay Predictor** PostgreSQL + PostGIS platform.
 
 ---
 

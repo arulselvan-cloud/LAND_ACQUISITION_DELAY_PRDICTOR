@@ -1,20 +1,20 @@
-# LandSight AI — Live Demonstration & Evaluation Script
+# Land Acquisition Delay Predictor — Live Demonstration & Evaluation Script
 
 **Problem Statement**: SIH26017 (Ministry of Statistics and Programme Implementation)  
-**Platform**: LandSight AI Decision-Support Dashboard  
+**Platform**: Land Acquisition Delay Predictor Decision-Support Dashboard  
 **Total Target Time**: 4 Minutes 30 Seconds (strictly under 5 minutes)  
 
 ---
 
 ### Segment 1: The Problem Framing (0:00 – 0:30)
-**Visual**: Open the LandSight AI Dashboard homepage (`http://localhost:5173`). The top executive KPI cards, calibrated risk breakdown donut chart (1,225 Low / 1,050 Medium / 700 High / 525 Critical), and interactive national district heatmap are displayed.
+**Visual**: Open the Land Acquisition Delay Predictor Dashboard homepage (`http://localhost:5173`). The top executive KPI cards, calibrated risk breakdown donut chart (1,225 Low / 1,050 Medium / 700 High / 525 Critical), and interactive national district heatmap are displayed.
 
 **Presenter Narration**:
 > *"Respected jury members, over 60% of India's mega infrastructure projects face severe time and cost overruns. The number one culprit is not engineering or finance—it is **land acquisition delays** under the RFCTLARR Act, 2013.*  
 > 
 > *Right now, monitoring is entirely reactive: District Collectors and Ministry officers only find out a project is paralyzed months after deadlines have already lapsed.*  
 > 
-> *We built **LandSight AI** to fundamentally shift governance from reactive post-mortems to **predictive early detection and prescriptive intervention** across 3,500 projects spanning 12 Indian states."*
+> *We built **Land Acquisition Delay Predictor** to fundamentally shift governance from reactive post-mortems to **predictive early detection and prescriptive intervention** across 3,500 projects spanning 12 Indian states."*
 
 ---
 
@@ -58,7 +58,7 @@
 **Presenter Narration**:
 > *"Knowing how many days can be saved still leaves the question: **What specific statutory steps must the District Collector take right now?**  
 > 
-> *LandSight AI bridges analytics directly into executive administration using **Google Gemini 2.5 Flash** grounded in our SHAP explainability drivers.*  
+> *Land Acquisition Delay Predictor bridges analytics directly into executive administration using **Google Gemini 2.5 Flash** grounded in our SHAP explainability drivers.*  
 > 
 > *Here is the synthesized administrative memo addressed directly to the District Collector and SLAO:*  
 > - **Sentence 1 (Root Cause)**: Cites exact project figures: the 99.3% delay risk, 90-day stay order impact, 340.5 hectares, and 420 PAFs.  
@@ -77,7 +77,7 @@
 > 
 > *The model classifies this project as **LOW RISK** with just a **1.6% delay probability**.*  
 > *Why? Compensation disbursement is at 94.4%, stakeholder responsiveness is an exceptional 91 out of 100, and there are zero active stay orders.*  
-> *Notice that LandSight AI does not flood the administrator with false alarms. Instead of critical alerts, it generates routine milestone monitoring directives to maintain positive acquisition momentum."*
+> *Notice that Land Acquisition Delay Predictor does not flood the administrator with false alarms. Instead of critical alerts, it generates routine milestone monitoring directives to maintain positive acquisition momentum."*
 
 ---
 
@@ -85,10 +85,10 @@
 **Visual**: Return to the main national dashboard with the district heatmap and executive overview.
 
 **Presenter Narration**:
-> *"To summarize, LandSight AI answers the three critical questions that existing infrastructure dashboards fail to answer:*  
+> *"To summarize, Land Acquisition Delay Predictor answers the three critical questions that existing infrastructure dashboards fail to answer:*  
 > 1. **Why is the project delayed?** Answered through transparent, local SHAP explainability—not black-box scores.  
 > 2. **What happens next if we do nothing?** Answered through sequential milestone delay propagation modeling.  
 > 3. **What should the administration do right now?** Answered through interactive What-If simulation and Gemini-powered administrative directives grounded in RFCTLARR 2013.  
 > 
-> *With LandSight AI, infrastructure monitoring moves from retrospective reports to forward-looking, proactive governance.*  
+> *With Land Acquisition Delay Predictor, infrastructure monitoring moves from retrospective reports to forward-looking, proactive governance.*  
 > *Thank you, and we welcome your questions."*

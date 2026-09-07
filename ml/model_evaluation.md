@@ -1,4 +1,4 @@
-# LandSight AI - Machine Learning Model Evaluation & Technical Defense
+# Land Acquisition Delay Predictor - Machine Learning Model Evaluation & Technical Defense
 
 **Module**: `ml/`  
 **Target Platform**: PostgreSQL / PostGIS (`landsight_ai`) via SQLAlchemy ORM  
@@ -9,7 +9,7 @@
 
 ## Executive Summary
 
-LandSight AI's analytical core couples non-linear gradient-boosted decision trees (**XGBoost**) for multi-tier categorical risk classification with **Cox Proportional Hazards (Cox PH)** semi-parametric survival models for statutory milestone duration forecasting.
+Land Acquisition Delay Predictor's analytical core couples non-linear gradient-boosted decision trees (**XGBoost**) for multi-tier categorical risk classification with **Cox Proportional Hazards (Cox PH)** semi-parametric survival models for statutory milestone duration forecasting.
 
 - **Multiclass Classifier 5-Fold CV Weighted F1**: **0.7819 (78.19%)**
 - **Held-out Test Set Accuracy**: **75.32%** (Macro F1: **0.7611**, Weighted F1: **0.7526**)
@@ -25,7 +25,7 @@ LandSight AI's analytical core couples non-linear gradient-boosted decision tree
 ### Deliberate Calibration Away From Near-Deterministic Labels
 In many synthetic benchmark pipelines, target labels are generated as strict algebraic functions of input covariates. Under such configurations, tree-based ensembles trivially achieve 95–99% classification accuracy not by discovering generalizable signals, but by reverse-engineering the data generator's deterministic equations.
 
-To ensure genuine real-world validity, LandSight AI's synthetic generation engine was deliberately calibrated with a Gaussian noise term:
+To ensure genuine real-world validity, Land Acquisition Delay Predictor's synthetic generation engine was deliberately calibrated with a Gaussian noise term:
 $$\text{logit}(z) = -2.25 + 1.95 \cdot x_{\text{dispute}} + 1.85 \cdot x_{\text{comp}} + 1.40 \cdot x_{\text{stk}} + 1.25 \cdot x_{\text{pesa}} + 0.90 \cdot x_{\text{fam}} + \epsilon, \quad \epsilon \sim \mathcal{N}(0, 0.22^2)$$
 
 This noise variance preserves the true causal gradients established by the RFCTLARR Act 2013 (active judicial stays, low compensation disbursement, and non-responsive authorities dramatically elevate delay hazard), while introducing realistic overlap across adjacent risk tiers (particularly between *Low* and *Medium*, and between *High* and *Critical*).
@@ -118,7 +118,7 @@ In accordance with biostatistical and survival analysis standards:
 
 ## 3. Explainability & SHAP Feature Attributions
 
-Using `shap.TreeExplainer`, LandSight AI evaluates both global feature importance and local project-level drivers.
+Using `shap.TreeExplainer`, Land Acquisition Delay Predictor evaluates both global feature importance and local project-level drivers.
 
 ### Top Global Feature Importances (Mean $|SHAP|$)
 

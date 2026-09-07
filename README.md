@@ -1,4 +1,4 @@
-# LandSight AI: AI-Powered Predictive Analytics Platform for Infrastructure Land Acquisition Delays
+# Land Acquisition Delay Predictor: AI-Powered Predictive Analytics Platform for Infrastructure Land Acquisition Delays
 
 [![Smart India Hackathon](https://img.shields.io/badge/SIH-2024-orange.svg)](https://www.sih.gov.in/)
 [![FastAPI](https://img.shields.io/badge/Backend-FastAPI-009688.svg)](https://fastapi.tiangolo.com/)
@@ -18,7 +18,7 @@
 
 Land acquisition hurdles account for over **60% of infrastructure project delays** and billions of dollars in capital overruns across Indian national highways, high-speed rail networks, industrial corridors, and energy pipelines. Under the **Right to Fair Compensation and Transparency in Land Acquisition, Rehabilitation and Resettlement Act, 2013 (RFCTLARR 2013)**, statutory milestones operate as a tightly coupled, sequential dependency chain. A single stay order or solatium dispute at an early milestone halts downstream possession and construction.
 
-**LandSight AI** transforms reactive bureaucratic firefighting into proactive administrative governance through a closed-loop **5-Stage Statutory Pipeline**:
+**Land Acquisition Delay Predictor** transforms reactive bureaucratic firefighting into proactive administrative governance through a closed-loop **5-Stage Statutory Pipeline**:
 1. **Stage 1 (Land Data)**: Spatial PostGIS cadastral parcel ingestion, Section 11/19/21 statutory milestone tracking, PAF records, and compensation treasury disbursements.
 2. **Stage 2 (AI Prediction)**: Calibrated multiclass risk classification (Low, Medium, High, Critical) and cumulative delay probability forecasting via XGBoost.
 3. **Stage 3 (Explainability)**: Local SHAP (TreeExplainer) attribution isolating exact delay drivers (active stay orders, solatium gaps, stakeholder responsiveness) with magnitude and direction.
@@ -30,7 +30,7 @@ Land acquisition hurdles account for over **60% of infrastructure project delays
 ## 2. System Architecture
 
 ```
-                                  LANDSIGHT AI PLATFORM
+                     LAND ACQUISITION DELAY PREDICTOR PLATFORM
  ┌─────────────────────────────────────────────────────────────────────────────────────────┐
  │                                   REACT 18 + VITE FRONTEND                               │
  │   ┌───────────────────────┐  ┌─────────────────────────┐  ┌───────────────────────────┐  │
@@ -91,7 +91,7 @@ Open `.env` and set your configuration.
 >    GEMINI_API_KEY=your_gemini_api_key_here
 >    GEMINI_TIMEOUT_SECONDS=12.0
 >    ```
-*(Note: If no key is configured or if the API times out, LandSight AI automatically falls back to deterministic rule-based administrative action templates without breaking).*
+*(Note: If no key is configured or if the API times out, Land Acquisition Delay Predictor automatically falls back to deterministic rule-based administrative action templates without breaking).*
 
 ### Step 3: Start the Spatial Database (Docker)
 Start PostgreSQL with the PostGIS extension using Docker Compose:
@@ -230,7 +230,7 @@ SIH PROTOTYPE/
 
 ## 9. Disaster Recovery & Database Backup
 
-LandSight AI includes an instant recovery mechanism to safeguard against accidental data corruption, container crashes, or dataset desynchronization.
+Land Acquisition Delay Predictor includes an instant recovery mechanism to safeguard against accidental data corruption, container crashes, or dataset desynchronization.
 
 ### Instant Restore from Backup
 To restore the complete 3,503-project database (including all 3 real showcase projects, 3,500 synthetic projects, 17,500 statutory stages, compensation records, legal disputes, and refreshed ML risk scores):

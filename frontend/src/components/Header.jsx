@@ -73,7 +73,7 @@ export default function Header({
 
           <div className="gov-title-group">
             <h1>
-              LandSight AI
+              Land Acquisition Delay Predictor
               <span
                 style={{
                   fontSize: '0.7rem',

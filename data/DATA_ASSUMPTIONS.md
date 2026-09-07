@@ -1,7 +1,7 @@
-# LandSight AI - Data Assumptions & Distribution Specification (SIH26017)
+# Land Acquisition Delay Predictor - Data Assumptions & Distribution Specification (SIH26017)
 
 ## 1. Statutory Context & Legal Grounding
-The synthetic dataset generation for **LandSight AI** is grounded in the statutory workflows and empirical failure modes of the **Right to Fair Compensation and Transparency in Land Acquisition, Rehabilitation and Resettlement Act, 2013 (RFCTLARR Act 2013)** and complementary state acquisition enactments (e.g., KIADB Act, Tamil Nadu Highway Act, Maharashtra PESA rules).
+The synthetic dataset generation for **Land Acquisition Delay Predictor** is grounded in the statutory workflows and empirical failure modes of the **Right to Fair Compensation and Transparency in Land Acquisition, Rehabilitation and Resettlement Act, 2013 (RFCTLARR Act 2013)** and complementary state acquisition enactments (e.g., KIADB Act, Tamil Nadu Highway Act, Maharashtra PESA rules).
 
 ---
 

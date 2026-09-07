@@ -1,4 +1,4 @@
-"""LandSight AI - FastAPI Application Entrypoint.
+"""Land Acquisition Delay Predictor - FastAPI Application Entrypoint.
 
 Problem Statement: SIH26017 - AI-Powered Predictive Analytics Platform
 for Early Detection and Mitigation of Infrastructure Land Acquisition Delays.
@@ -33,7 +33,7 @@ if not MODELS_DIR.exists():
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Application lifespan context manager for eager preloading of ML models into app.state."""
-    logger.info(f"[*] Starting LandSight AI API service. Loading ML models from: {MODELS_DIR}...")
+    logger.info(f"[*] Starting Land Acquisition Delay Predictor API service. Loading ML models from: {MODELS_DIR}...")
     start_time = time.time()
 
     # 1. Load Multiclass Risk Classifier
@@ -84,11 +84,11 @@ async def lifespan(app: FastAPI):
 
     yield
 
-    logger.info("[*] Shutting down LandSight AI API service...")
+    logger.info("[*] Shutting down Land Acquisition Delay Predictor API service...")
 
 
 app = FastAPI(
-    title="LandSight AI - Predictive Analytics Platform API",
+    title="Land Acquisition Delay Predictor",
     description=(
         "Production backend for SIH26017: Early Detection and Mitigation of Infrastructure "
         "Land Acquisition Delays with RFCTLARR 2013 Milestone Tracking and Explainable AI."
@@ -135,7 +135,7 @@ app.include_router(recommendations_router, prefix="/api", tags=["AI Recommendati
 def root():
     """Returns basic service metadata and API health."""
     return {
-        "service": "LandSight AI API",
+        "service": "Land Acquisition Delay Predictor API",
         "problem_statement": "SIH26017",
         "status": "online",
         "version": "1.0.0",

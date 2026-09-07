@@ -1,5 +1,5 @@
 /**
- * LandSight AI - District Name Aliases for GeoJSON Polygon Matching
+ * Land Acquisition Delay Predictor - District Name Aliases for GeoJSON Polygon Matching
  * 
  * Maps post-2011 newly bifurcated or renamed Indian districts to their
  * corresponding parent/historical district polygon in the 2011 Census GeoJSON (dists11.geojson).

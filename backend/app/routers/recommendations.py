@@ -274,7 +274,7 @@ def generate_project_recommendation(
                     )
 
             notif_msg = (
-                f"LandSight AI Alert: {proj.project_code} flagged {pred_cat.upper()} risk — "
+                f"Land Acquisition Delay Predictor Alert: {proj.project_code} flagged {pred_cat.upper()} risk — "
                 f"{top_driver}. Immediate review required."
             )
 

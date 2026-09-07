@@ -1,5 +1,5 @@
 /**
- * LandSight AI - Frontend API Client Layer
+ * Land Acquisition Delay Predictor - Frontend API Client Layer
  * 
  * Interfacing with FastAPI backend at http://localhost:8000/api
  * Handles network operations and user-visible error formatting for 404, 422, and 500 statuses.
@@ -81,7 +81,7 @@ async function request(endpoint, options = {}) {
     }
     // Network connectivity or unexpected parse error
     throw new ApiError(
-      `Unable to connect to LandSight AI Backend at ${API_BASE_URL}. Please ensure the service is running.`,
+      `Unable to connect to Land Acquisition Delay Predictor Backend at ${API_BASE_URL}. Please ensure the service is running.`,
       0,
       err
     );

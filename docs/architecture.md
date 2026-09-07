@@ -1,4 +1,4 @@
-# LandSight AI - Architecture Overview
+# Land Acquisition Delay Predictor - Architecture Overview
 
 ## Problem Statement
 **SIH26017**: AI-Powered Predictive Analytics Platform for Early Detection of Land Acquisition Delays.

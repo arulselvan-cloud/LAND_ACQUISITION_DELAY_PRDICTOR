@@ -40,7 +40,7 @@
     ],
     "alert_created": false,
     "notification_dispatched": false,
-    "notification_message": "LandSight AI Alert: CBIC-TN-PKG02 flagged CRITICAL risk \u2014 Statutory milestone delays. Immediate review required."
+    "notification_message": "Land Acquisition Delay Predictor Alert: CBIC-TN-PKG02 flagged CRITICAL risk \u2014 Statutory milestone delays. Immediate review required."
   },
   "MAHSR": {
     "project_id": "d4342972-891e-4786-96b6-6b9c51621d60",
@@ -92,7 +92,7 @@
     ],
     "alert_created": false,
     "notification_dispatched": false,
-    "notification_message": "LandSight AI Alert: MAHSR-MH-PAL03 flagged CRITICAL risk \u2014 Statutory milestone delays. Immediate review required."
+    "notification_message": "Land Acquisition Delay Predictor Alert: MAHSR-MH-PAL03 flagged CRITICAL risk \u2014 Statutory milestone delays. Immediate review required."
   },
   "BSRP": {
     "project_id": "3f857dce-8775-4cd2-b00a-84af2bb4d3dd",
@@ -187,6 +187,6 @@
     ],
     "alert_created": false,
     "notification_dispatched": false,
-    "notification_message": "LandSight AI Alert: CBIC-TN-PKG02 flagged CRITICAL risk \u2014 Statutory milestone delays. Immediate review required."
+    "notification_message": "Land Acquisition Delay Predictor Alert: CBIC-TN-PKG02 flagged CRITICAL risk \u2014 Statutory milestone delays. Immediate review required."
   }
 }

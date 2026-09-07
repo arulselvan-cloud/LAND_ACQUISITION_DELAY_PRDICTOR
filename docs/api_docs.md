@@ -1,4 +1,4 @@
-# LandSight AI - API Specification (Draft)
+# Land Acquisition Delay Predictor - API Specification (Draft)
 
 ## Base URL
 ```
