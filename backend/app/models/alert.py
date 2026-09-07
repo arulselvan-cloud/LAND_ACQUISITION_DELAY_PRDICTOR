@@ -48,3 +48,9 @@ class Alert(Base, TimestampDataSourceMixin):
     resolved_by = Column(String(100), nullable=True)
 
     project = relationship("Project", back_populates="alerts")
+    notifications = relationship(
+        "NotificationLog",
+        back_populates="alert",
+        cascade="all, delete-orphan",
+        order_by="desc(NotificationLog.sent_at)",
+    )

@@ -16,6 +16,7 @@ from backend.app.models.enums import (
     StakeholderRoleEnum,
 )
 from backend.app.models.legal import LegalDispute
+from backend.app.models.notification import NotificationLog
 from backend.app.models.project import Project
 from backend.app.models.recommendation import Recommendation
 from backend.app.models.rehabilitation import RehabilitationProgress
@@ -46,5 +47,6 @@ __all__ = [
     "RiskScore",
     "Recommendation",
     "Alert",
+    "NotificationLog",
     "Stakeholder",
 ]

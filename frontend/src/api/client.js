@@ -192,3 +192,21 @@ export async function getProjectRecommendations(projectId) {
   return request(`/projects/${encodeURIComponent(projectId)}/recommendations`);
 }
 
+/**
+ * Retrieves simulated notification dispatch logs for an alert.
+ */
+export async function getAlertNotifications(alertId) {
+  return request(`/alerts/${encodeURIComponent(alertId)}/notifications`);
+}
+
+/**
+ * Triggers retraining of the XGBoost risk classifier against current database state.
+ * Guarded by confirm query parameter.
+ */
+export async function retrainModel(confirm = true) {
+  const query = confirm ? '?confirm=true' : '';
+  return request(`/retrain${query}`, {
+    method: 'POST',
+  });
+}
+

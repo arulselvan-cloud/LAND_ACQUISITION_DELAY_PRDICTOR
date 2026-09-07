@@ -1,5 +1,5 @@
 import React from 'react';
-import { AlertCircle, ArrowUpRight, Flame, ShieldAlert } from 'lucide-react';
+import { AlertCircle, ArrowUpRight, Flame, Send, ShieldAlert } from 'lucide-react';
 
 export default function AlertsFeed({
   alerts = [],
@@ -76,6 +76,39 @@ export default function AlertsFeed({
                   <div className="alert-rec-snippet">
                     <span style={{ fontWeight: 700, color: 'var(--gov-blue)', marginRight: '4px' }}>Action:</span>
                     {alert.recommendation_snippet}
+                  </div>
+                )}
+
+                {alert.notification_preview && (
+                  <div
+                    style={{
+                      marginTop: '8px',
+                      padding: '7px 10px',
+                      background: 'rgba(13, 148, 136, 0.08)',
+                      border: '1px solid rgba(13, 148, 136, 0.3)',
+                      borderRadius: '6px',
+                      fontSize: '0.72rem',
+                    }}
+                  >
+                    <div
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '5px',
+                        color: '#0d9488',
+                        fontWeight: 700,
+                        marginBottom: '3px',
+                      }}
+                    >
+                      <Send size={11} />
+                      <span>
+                        Notification Sent • {alert.notification_channel?.toUpperCase() || 'SMS'} to{' '}
+                        {alert.notification_recipient || 'District Collector'}
+                      </span>
+                    </div>
+                    <div style={{ color: 'var(--text-muted)', fontStyle: 'italic', lineHeight: 1.35 }}>
+                      "{alert.notification_preview}"
+                    </div>
                   </div>
                 )}
               </div>

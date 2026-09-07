@@ -5,19 +5,19 @@
     "name": "Chennai-Bengaluru Industrial Corridor (CBIC) - Package 2",
     "predicted_risk_category": "critical",
     "delay_probability": 0.9935,
-    "memo": "The Chennai-Bengaluru Industrial Corridor (CBIC-TN-PKG02) in Ranipet District faces a critical 99.3% delay probability stemming from an active judicial stay order causing a 90-day impact, compounded by the substantial acquisition of 340.5 Ha and grievances concerning 420 Project Affected Families. The District Collector, in close coordination with the Legal Cell, is hereby directed to urgently secure the vacation of the judicial stay, deploy additional revenue surveyor teams for expeditious cadastral boundary demarcation, and convene Special Gram Sabhas to resolve community compensation grievances. These priority actions must be completed within 14-30 days to unblock statutory land vesting, mitigate further legal dispute delays, and ensure compliance with the RFCTLARR, 2013, thereby averting significant project timeline overruns.",
+    "memo": "The Chennai-Bengaluru Industrial Corridor (CBIC) - Package 2 in District Ranipet faces a critical 99.3% delay probability due to an active court stay projecting a 90-day legal dispute delay impact, compounded by the significant acquisition of 340.5 Ha for 420 Project Affected Families. The District Collector and Legal Cell must urgently coordinate to vacate the active stay order and deploy additional revenue surveyor teams for precise cadastral demarcation and Joint Measurement Survey to expedite land acquisition processes. These concerted actions are imperative to achieve resolution within 14-30 days, preventing a projected 90-day judicial delay and ensuring compliance with the RFCTLARR Act, 2013.",
     "is_llm_generated": true,
     "fallback_used": false,
     "model": "gemini-2.5-flash",
     "recommendations": [
       {
-        "id": "d12ec2e1-e44d-4df4-acd1-6c3dab00ea8c",
-        "action_text": "The Chennai-Bengaluru Industrial Corridor (CBIC-TN-PKG02) in Ranipet District faces a critical 99.3% delay probability stemming from an active judicial stay order causing a 90-day impact, compounded by the substantial acquisition of 340.5 Ha and grievances concerning 420 Project Affected Families. The District Collector, in close coordination with the Legal Cell, is hereby directed to urgently secure the vacation of the judicial stay, deploy additional revenue surveyor teams for expeditious cadastral boundary demarcation, and convene Special Gram Sabhas to resolve community compensation grievances. These priority actions must be completed within 14-30 days to unblock statutory land vesting, mitigate further legal dispute delays, and ensure compliance with the RFCTLARR, 2013, thereby averting significant project timeline overruns.",
+        "id": "e30a3db3-4938-491c-ab21-a372a80e6813",
+        "action_text": "The Chennai-Bengaluru Industrial Corridor (CBIC) - Package 2 in District Ranipet faces a critical 99.3% delay probability due to an active court stay projecting a 90-day legal dispute delay impact, compounded by the significant acquisition of 340.5 Ha for 420 Project Affected Families. The District Collector and Legal Cell must urgently coordinate to vacate the active stay order and deploy additional revenue surveyor teams for precise cadastral demarcation and Joint Measurement Survey to expedite land acquisition processes. These concerted actions are imperative to achieve resolution within 14-30 days, preventing a projected 90-day judicial delay and ensuring compliance with the RFCTLARR Act, 2013.",
         "priority": "urgent",
         "category": "Executive Directive",
         "expected_impact": "Mitigate statutory milestone delays and unblock inter-agency execution under RFCTLARR 2013",
         "is_implemented": false,
-        "created_at": "2026-09-05T22:44:11.956151+05:30"
+        "created_at": "2026-09-06T15:02:17.170384+05:30"
       },
       {
         "id": "57b4c80e-db9f-4956-b79a-b4c10a39848d",
@@ -36,18 +36,11 @@
         "expected_impact": "Complete Cadastral boundary demarcation and joint measurement survey (JMS)",
         "is_implemented": false,
         "created_at": "2026-09-05T22:24:32.375092+05:30"
-      },
-      {
-        "id": "78acf5e3-71d0-48ab-8dfb-751f03f0f48e",
-        "action_text": "Convene Special Gram Sabha and localized grievance redressal camps for Project Affected Families",
-        "priority": "low",
-        "category": "Public Engagement & Solatium",
-        "expected_impact": "Address community compensation grievances and minimize risk of Section 15 objections",
-        "is_implemented": false,
-        "created_at": "2026-09-05T22:44:11.956151+05:30"
       }
     ],
-    "alert_created": false
+    "alert_created": false,
+    "notification_dispatched": false,
+    "notification_message": "LandSight AI Alert: CBIC-TN-PKG02 flagged CRITICAL risk \u2014 Statutory milestone delays. Immediate review required."
   },
   "MAHSR": {
     "project_id": "d4342972-891e-4786-96b6-6b9c51621d60",
@@ -55,14 +48,14 @@
     "name": "Mumbai-Ahmedabad High Speed Rail (MAHSR) - Palghar Section",
     "predicted_risk_category": "critical",
     "delay_probability": 0.9975,
-    "memo": "The Mumbai-Ahmedabad High Speed Rail (MAHSR) Palghar Section (MAHSR-MH-PAL03) faces a critical 99.8% delay probability due to an active court stay order, a projected 180-day legal dispute delay impact, and the substantial 286.4 Ha total acquisition land area for 890 Project Affected Families (PAFs). The Legal Cell is directed to coordinate on an urgent priority basis to vacate the active judicial stay order or file an urgency memo to unblock statutory land vesting, concurrently, the District Collectorate and SLAO must deploy additional revenue surveyor teams and DGPS/drone units for immediate cadastral boundary demarcation and Joint Measurement Survey. These decisive actions are expected to resolve critical bottlenecks within 14-30 days, potentially saving up to 180 days of project delay and facilitating land acquisition under RFCTLARR 2013.",
+    "memo": "The MAHSR-MH-PAL03 section faces a critical delay probability due to an active judicial stay order projecting 180 days of delay, significant land acquisition challenges involving 286.4 Ha, and potential grievances from 890 Project Affected Families. Accordingly, the District Collector, in coordination with the Legal Cell, is directed to immediately expedite the vacation of the active court stay, deploy additional land administration teams for swift parcel demarcation and Joint Measurement Survey of the 286.4 Ha, and convene urgent Special Gram Sabhas for prompt redressal of grievances concerning the 890 Project Affected Families. These decisive actions are imperative within the next 14-30 days to avert the projected 180 days of judicial delay and ensure adherence to the timelines stipulated under the RFCTLARR Act, 2013.",
     "is_llm_generated": true,
     "fallback_used": false,
     "model": "gemini-2.5-flash",
     "recommendations": [
       {
         "id": "b8821c5a-b5c9-419d-9d97-0053e2e3b3f1",
-        "action_text": "The Mumbai-Ahmedabad High Speed Rail (MAHSR) Palghar Section (MAHSR-MH-PAL03) faces a critical 99.8% delay probability due to an active court stay order, a projected 180-day legal dispute delay impact, and the substantial 286.4 Ha total acquisition land area for 890 Project Affected Families (PAFs). The Legal Cell is directed to coordinate on an urgent priority basis to vacate the active judicial stay order or file an urgency memo to unblock statutory land vesting, concurrently, the District Collectorate and SLAO must deploy additional revenue surveyor teams and DGPS/drone units for immediate cadastral boundary demarcation and Joint Measurement Survey. These decisive actions are expected to resolve critical bottlenecks within 14-30 days, potentially saving up to 180 days of project delay and facilitating land acquisition under RFCTLARR 2013.",
+        "action_text": "The MAHSR-MH-PAL03 section faces a critical delay probability due to an active judicial stay order projecting 180 days of delay, significant land acquisition challenges involving 286.4 Ha, and potential grievances from 890 Project Affected Families. Accordingly, the District Collector, in coordination with the Legal Cell, is directed to immediately expedite the vacation of the active court stay, deploy additional land administration teams for swift parcel demarcation and Joint Measurement Survey of the 286.4 Ha, and convene urgent Special Gram Sabhas for prompt redressal of grievances concerning the 890 Project Affected Families. These decisive actions are imperative within the next 14-30 days to avert the projected 180 days of judicial delay and ensure adherence to the timelines stipulated under the RFCTLARR Act, 2013.",
         "priority": "urgent",
         "category": "Executive Directive",
         "expected_impact": "Mitigate statutory milestone delays and unblock inter-agency execution under RFCTLARR 2013",
@@ -86,9 +79,20 @@
         "expected_impact": "Complete Cadastral boundary demarcation and joint measurement survey (JMS)",
         "is_implemented": false,
         "created_at": "2026-09-05T22:30:51.212040+05:30"
+      },
+      {
+        "id": "4880c176-1b33-45e6-9eb5-3a02ff95b8e9",
+        "action_text": "Convene Special Gram Sabha and localized grievance redressal camps for Project Affected Families",
+        "priority": "high",
+        "category": "Public Engagement & Solatium",
+        "expected_impact": "Address community compensation grievances and minimize risk of Section 15 objections",
+        "is_implemented": false,
+        "created_at": "2026-09-07T12:49:40.277356+05:30"
       }
     ],
-    "alert_created": false
+    "alert_created": false,
+    "notification_dispatched": false,
+    "notification_message": "LandSight AI Alert: MAHSR-MH-PAL03 flagged CRITICAL risk \u2014 Statutory milestone delays. Immediate review required."
   },
   "BSRP": {
     "project_id": "3f857dce-8775-4cd2-b00a-84af2bb4d3dd",
@@ -138,7 +142,9 @@
         "created_at": "2026-09-05T22:30:58.388175+05:30"
       }
     ],
-    "alert_created": false
+    "alert_created": false,
+    "notification_dispatched": false,
+    "notification_message": null
   },
   "FALLBACK": {
     "project_id": "b7e129af-46b6-4a23-8626-5a8c0d3540ca",
@@ -146,19 +152,19 @@
     "name": "Chennai-Bengaluru Industrial Corridor (CBIC) - Package 2",
     "predicted_risk_category": "critical",
     "delay_probability": 0.9935,
-    "memo": "Project Chennai-Bengaluru Industrial Corridor (CBIC) - Package 2 (CBIC-TN-PKG02) in Ranipet, Tamil Nadu is evaluated at CRITICAL delay risk (99.3% delay probability), primarily triggered by an active court stay order projected to delay possession by 90 days across 340.5 hectares. The District Collector and Special Land Acquisition Officer (SLAO) must immediately coordinate with legal cell to expedite resolution of active stay order / litigation in direct liaison with the Industrial / Expressway Project Implementation Unit. Initiating this intervention within 14 days is projected to vacate judicial stay order or file urgency memo to unblock statutory land vesting and protect the statutory acquisition timeline under RFCTLARR 2013.",
+    "memo": "Project Chennai-Bengaluru Industrial Corridor (CBIC) - Package 2 (CBIC-TN-PKG02) in Ranipet, Tamil Nadu is evaluated at CRITICAL delay risk (99.3% delay probability), primarily triggered by an active court stay order projected to delay possession by 90 days across 340.5 hectares. The District Collector and Special Land Acquisition Officer (SLAO) must immediately coordinate with legal cell to expedite resolution of active stay order / litigation in direct liaison with the Industrial / Expressway Project Implementation Unit. Initiating this intervention within 14 days is projected to vacate active stay order to avert up to 90 days of projected judicial delay and protect the statutory acquisition timeline under RFCTLARR 2013.",
     "is_llm_generated": false,
     "fallback_used": true,
     "model": "rule-fallback-simulated",
     "recommendations": [
       {
-        "id": "94b0359d-d4a8-487e-96fc-6ca8a3873672",
-        "action_text": "Project Chennai-Bengaluru Industrial Corridor (CBIC) - Package 2 (CBIC-TN-PKG02) in Ranipet, Tamil Nadu is evaluated at CRITICAL delay risk (99.3% delay probability), primarily triggered by an active court stay order projected to delay possession by 90 days across 340.5 hectares. The District Collector and Special Land Acquisition Officer (SLAO) must immediately coordinate with legal cell to expedite resolution of active stay order / litigation in direct liaison with the Industrial / Expressway Project Implementation Unit. Initiating this intervention within 14 days is projected to vacate judicial stay order or file urgency memo to unblock statutory land vesting and protect the statutory acquisition timeline under RFCTLARR 2013.",
+        "id": "e30a3db3-4938-491c-ab21-a372a80e6813",
+        "action_text": "Project Chennai-Bengaluru Industrial Corridor (CBIC) - Package 2 (CBIC-TN-PKG02) in Ranipet, Tamil Nadu is evaluated at CRITICAL delay risk (99.3% delay probability), primarily triggered by an active court stay order projected to delay possession by 90 days across 340.5 hectares. The District Collector and Special Land Acquisition Officer (SLAO) must immediately coordinate with legal cell to expedite resolution of active stay order / litigation in direct liaison with the Industrial / Expressway Project Implementation Unit. Initiating this intervention within 14 days is projected to vacate active stay order to avert up to 90 days of projected judicial delay and protect the statutory acquisition timeline under RFCTLARR 2013.",
         "priority": "urgent",
         "category": "Executive Directive",
         "expected_impact": "Mitigate statutory milestone delays and unblock inter-agency execution under RFCTLARR 2013",
         "is_implemented": false,
-        "created_at": "2026-09-05T22:44:33.222141+05:30"
+        "created_at": "2026-09-06T15:02:17.170384+05:30"
       },
       {
         "id": "57b4c80e-db9f-4956-b79a-b4c10a39848d",
@@ -177,17 +183,10 @@
         "expected_impact": "Complete Cadastral boundary demarcation and joint measurement survey (JMS)",
         "is_implemented": false,
         "created_at": "2026-09-05T22:24:32.375092+05:30"
-      },
-      {
-        "id": "78acf5e3-71d0-48ab-8dfb-751f03f0f48e",
-        "action_text": "Convene Special Gram Sabha and localized grievance redressal camps for Project Affected Families",
-        "priority": "low",
-        "category": "Public Engagement & Solatium",
-        "expected_impact": "Address community compensation grievances and minimize risk of Section 15 objections",
-        "is_implemented": false,
-        "created_at": "2026-09-05T22:44:11.956151+05:30"
       }
     ],
-    "alert_created": false
+    "alert_created": false,
+    "notification_dispatched": false,
+    "notification_message": "LandSight AI Alert: CBIC-TN-PKG02 flagged CRITICAL risk \u2014 Statutory milestone delays. Immediate review required."
   }
 }

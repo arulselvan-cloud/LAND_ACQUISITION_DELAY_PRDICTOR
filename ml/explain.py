@@ -82,25 +82,36 @@ class ModelExplainer:
         # 3. Compute SHAP values
         shap_values = self.explainer.shap_values(feat_df)
         # shap_values shape: (1, n_features, n_classes) or list of (1, n_features) per class
+        # Label mapping: 0: 'low', 1: 'medium', 2: 'high', 3: 'critical'
         if isinstance(shap_values, list):
-            class_shap = shap_values[pred_idx][0]
+            sv_by_class = [sv[0] for sv in shap_values]
         elif len(shap_values.shape) == 3:
-            class_shap = shap_values[0, :, pred_idx]
+            sv_by_class = [shap_values[0, :, c] for c in range(shap_values.shape[2])]
         else:
-            class_shap = shap_values[0]
+            sv_by_class = [shap_values[0]] * 4
 
         # 4. Rank features by magnitude
+        # SHAP-weighted ordinal risk score across all 4 classes (low=0, medium=1, high=2, critical=3):
+        # Directly computes each feature's contribution to the expected ordinal risk tier.
+        # Monotonic and consistent across all classes without any per-class casework.
+        class_shap = (
+            0 * np.array(sv_by_class[0])
+            + 1 * np.array(sv_by_class[1])
+            + 2 * np.array(sv_by_class[2])
+            + 3 * np.array(sv_by_class[3])
+        )
+
         factors = []
-        for feat_name, shap_val in zip(self.feature_names, class_shap):
+        for feat_name, risk_shap in zip(self.feature_names, class_shap):
             raw_val = feat_vals.get(feat_name, None)
-            direction = "increases_risk" if shap_val > 0 else "decreases_risk"
+            direction = "increases_risk" if risk_shap > 0 else "decreases_risk"
             factors.append({
                 "feature": feat_name,
                 "display_name": FEATURE_HUMAN_NAMES.get(feat_name, feat_name),
                 "value": raw_val,
-                "shap_value": round(float(shap_val), 4),
-                "magnitude": round(float(abs(shap_val)), 4),
-                "impact": round(float(abs(shap_val)), 4),
+                "shap_value": round(float(risk_shap), 4),
+                "magnitude": round(float(abs(risk_shap)), 4),
+                "impact": round(float(abs(risk_shap)), 4),
                 "direction": direction,
             })
 

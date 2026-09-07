@@ -17,9 +17,11 @@ from sqlalchemy import case, desc, func
 from sqlalchemy.orm import Session
 
 from backend.app.database import get_db
+from backend.app.models.alert import Alert
 from backend.app.models.compensation import CompensationRecord
 from backend.app.models.enums import DisputeStatusEnum, RiskCategoryEnum
 from backend.app.models.legal import LegalDispute
+from backend.app.models.notification import NotificationLog
 from backend.app.models.project import Project
 from backend.app.models.rehabilitation import RehabilitationProgress
 from backend.app.models.recommendation import Recommendation
@@ -64,6 +66,7 @@ class DistrictSummaryItem(BaseModel):
 
 class AlertItem(BaseModel):
     id: str
+    alert_id: Optional[str] = None
     project_code: str
     name: str
     district: str
@@ -74,6 +77,10 @@ class AlertItem(BaseModel):
     land_area_hectares: float
     affected_families_count: int
     recommendation_snippet: Optional[str] = None
+    notification_preview: Optional[str] = None
+    notification_channel: Optional[str] = None
+    notification_recipient: Optional[str] = None
+    notification_sent_at: Optional[datetime] = None
     computed_at: Optional[datetime] = None
 
 
@@ -372,11 +379,20 @@ def get_risk_alerts(
         .count()
     )
 
+    has_active_alert = (
+        db.query(Alert.id)
+        .filter(Alert.project_id == Project.id, Alert.resolved == False)
+        .exists()
+    )
+
     records = (
         db.query(Project, RiskScore)
         .join(RiskScore, Project.id == RiskScore.project_id)
         .filter(func.coalesce(RiskScore.predicted_risk_category, RiskScore.risk_category).in_(high_risk_cats))
-        .order_by(desc(func.coalesce(RiskScore.predicted_delay_probability, RiskScore.overall_delay_probability)))
+        .order_by(
+            desc(has_active_alert),
+            desc(func.coalesce(RiskScore.predicted_delay_probability, RiskScore.overall_delay_probability)),
+        )
         .limit(limit)
         .all()
     )
@@ -405,6 +421,33 @@ def get_risk_alerts(
                 text = text[:127] + "..."
             rec_map[pid] = text
 
+    # Batch query latest alerts & notifications for these projects
+    db_alerts = (
+        db.query(Alert)
+        .filter(Alert.project_id.in_(proj_ids))
+        .order_by(Alert.triggered_at.desc())
+        .all()
+    )
+    alert_map: Dict[str, Alert] = {}
+    for a in db_alerts:
+        pid = str(a.project_id)
+        if pid not in alert_map:
+            alert_map[pid] = a
+
+    alert_ids = [a.id for a in alert_map.values()]
+    notif_map: Dict[str, NotificationLog] = {}
+    if alert_ids:
+        notif_records = (
+            db.query(NotificationLog)
+            .filter(NotificationLog.alert_id.in_(alert_ids))
+            .order_by(NotificationLog.sent_at.desc())
+            .all()
+        )
+        for n in notif_records:
+            aid = str(n.alert_id)
+            if aid not in notif_map:
+                notif_map[aid] = n
+
     alerts = []
     for proj, stored_risk in records:
         pid_str = str(proj.id)
@@ -427,9 +470,13 @@ def get_risk_alerts(
             else:
                 rec_snippet = "Escalate pending compensation disbursement with District Treasury / SLAO."
 
+        db_alert = alert_map.get(pid_str)
+        matched_notif = notif_map.get(str(db_alert.id)) if db_alert else None
+
         alerts.append(
             AlertItem(
                 id=pid_str,
+                alert_id=str(db_alert.id) if db_alert else None,
                 project_code=proj.project_code,
                 name=proj.name,
                 district=proj.district,
@@ -440,12 +487,19 @@ def get_risk_alerts(
                 land_area_hectares=float(proj.land_area_hectares or 0.0),
                 affected_families_count=int(proj.affected_families_count or 0),
                 recommendation_snippet=rec_snippet,
+                notification_preview=matched_notif.message if matched_notif else None,
+                notification_channel=matched_notif.channel if matched_notif else None,
+                notification_recipient=matched_notif.recipient_role if matched_notif else None,
+                notification_sent_at=matched_notif.sent_at if matched_notif else None,
                 computed_at=computed_at,
             )
         )
 
-    # Sort alerts descending by live computed probability
-    alerts.sort(key=lambda a: a.delay_probability, reverse=True)
+    # Sort alerts: active alerts with notifications first, then descending by live computed probability
+    alerts.sort(
+        key=lambda a: (1 if a.notification_preview or a.alert_id else 0, a.delay_probability),
+        reverse=True,
+    )
 
     return AlertsResponse(
         total_alerts=total_alerts,

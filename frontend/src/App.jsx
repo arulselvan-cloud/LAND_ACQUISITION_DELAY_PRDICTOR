@@ -5,6 +5,7 @@ import DistrictHeatmap from './components/DistrictHeatmap';
 import ProjectTable from './components/ProjectTable';
 import AlertsFeed from './components/AlertsFeed';
 import ProjectDetail from './components/ProjectDetail';
+import ProjectComparisonModal from './components/ProjectComparisonModal';
 import {
   getHealthCheck,
   getExecutiveSummary,
@@ -29,6 +30,10 @@ export default function App() {
   const [searchQuery, setSearchQuery] = useState('');
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(20);
+
+  // Multi-Project Comparison State (2-3 projects)
+  const [comparisonSelectedIds, setComparisonSelectedIds] = useState([]);
+  const [showComparisonModal, setShowComparisonModal] = useState(false);
 
   const [loadingProjects, setLoadingProjects] = useState(false);
   const [loadingSummary, setLoadingSummary] = useState(true);
@@ -99,13 +104,46 @@ export default function App() {
     setSelectedProjectId(projectCode);
   };
 
+  // Comparison Handlers
+  const handleToggleComparison = (projectCode) => {
+    setComparisonSelectedIds((prev) => {
+      if (prev.includes(projectCode)) {
+        return prev.filter((id) => id !== projectCode);
+      }
+      if (prev.length >= 3) {
+        alert('You can select a maximum of 3 projects for parallel comparison.');
+        return prev;
+      }
+      return [...prev, projectCode];
+    });
+  };
+
+  const handleSelectTrio = () => {
+    const trio = ['CBIC-TN-PKG02', 'BSRP-KA-CORR04', 'MAHSR-MH-PAL03'];
+    setComparisonSelectedIds(trio);
+    setShowComparisonModal(true);
+  };
+
+  const handleOpenComparison = () => {
+    if (comparisonSelectedIds.length < 2) {
+      alert('Please select at least 2 projects from the catalog (using the checkboxes) to compare.');
+      return;
+    }
+    setShowComparisonModal(true);
+  };
+
+  const handleClearComparison = () => {
+    setComparisonSelectedIds([]);
+  };
+
   return (
     <div className="dashboard-root">
-      {/* Executive Header with Showcase Selector */}
+      {/* Executive Header with Showcase Selector & Retrain Action */}
       <Header
         health={health}
         onSelectShowcase={handleSelectShowcase}
         activeProjectId={selectedProjectId}
+        onOpenComparison={handleSelectTrio}
       />
 
       <main className="dashboard-main">
@@ -171,6 +209,11 @@ export default function App() {
           onSelectProject={(code) => setSelectedProjectId(code)}
           selectedProjectId={selectedProjectId}
           loading={loadingProjects}
+          comparisonSelectedIds={comparisonSelectedIds}
+          onToggleComparison={handleToggleComparison}
+          onOpenComparison={handleOpenComparison}
+          onSelectTrio={handleSelectTrio}
+          onClearComparison={handleClearComparison}
         />
       </main>
 
@@ -179,6 +222,19 @@ export default function App() {
         <ProjectDetail
           projectId={selectedProjectId}
           onClose={() => setSelectedProjectId(null)}
+        />
+      )}
+
+      {/* 5. Project Comparison Modal (Side-by-Side 2-3 Corridors) */}
+      {showComparisonModal && (
+        <ProjectComparisonModal
+          projectIds={comparisonSelectedIds.length >= 2 ? comparisonSelectedIds : ['CBIC-TN-PKG02', 'BSRP-KA-CORR04', 'MAHSR-MH-PAL03']}
+          onClose={() => setShowComparisonModal(false)}
+          onSelectProject={(code) => {
+            setShowComparisonModal(false);
+            setSelectedProjectId(code);
+          }}
+          onSelectTrio={handleSelectTrio}
         />
       )}
     </div>

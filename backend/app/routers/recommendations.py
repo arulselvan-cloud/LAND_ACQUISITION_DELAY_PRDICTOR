@@ -15,6 +15,8 @@ from sqlalchemy.orm import Session
 from backend.app.database import get_db
 from backend.app.models.alert import Alert
 from backend.app.models.enums import AlertSeverityEnum, PriorityEnum
+from backend.app.models.notification import NotificationLog
+from backend.app.models.project import Project
 from backend.app.models.recommendation import Recommendation
 from backend.app.models.risk import RiskScore
 from backend.app.services.llm_recommendations import generate_action_memo
@@ -23,6 +25,17 @@ from backend.app.services.recommendation_engine import get_rule_based_recommenda
 from ml.explain import ModelExplainer
 
 router = APIRouter()
+
+
+class NotificationLogItem(BaseModel):
+    id: str
+    alert_id: str
+    channel: str
+    recipient_role: str
+    message: str
+    sent_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
 
 
 class RecommendationItem(BaseModel):
@@ -49,6 +62,8 @@ class GenerateRecommendationResponse(BaseModel):
     model: str
     recommendations: List[RecommendationItem]
     alert_created: bool
+    notification_dispatched: bool = False
+    notification_message: Optional[str] = None
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -186,37 +201,102 @@ def generate_project_recommendation(
         else:
             persisted_recs.append(existing)
 
-    # 7. Automatic Alert Trigger for High / Critical Risk Projects (avoid duplicate unresolved alerts)
+    # 7. Automatic Alert Trigger & De-duplicated Notification Dispatch
     alert_created = False
+    notification_dispatched = False
+    notif_msg = None
+
     if pred_cat in ["high", "critical"]:
+        target_severity = (
+            AlertSeverityEnum.critical
+            if pred_cat == "critical"
+            else AlertSeverityEnum.high
+        )
         existing_alert = (
             db.query(Alert)
             .filter(Alert.project_id == proj.id, Alert.resolved == False)
             .first()
         )
+
+        should_dispatch_notification = False
+        target_alert = None
+
         if not existing_alert:
             new_alert = Alert(
                 project_id=proj.id,
                 title=f"{proj.project_code}: Priority Delay Bottleneck Alert",
                 message=memo_result["memo"][:240] + "...",
-                severity=(
-                    AlertSeverityEnum.critical
-                    if pred_cat == "critical"
-                    else AlertSeverityEnum.high
-                ),
+                severity=target_severity,
                 resolved=False,
                 data_source=proj.data_source,
             )
             db.add(new_alert)
+            db.flush()
             alert_created = True
+            target_alert = new_alert
+            # Case (a): Brand-new alert created -> Dispatch initial notification
+            should_dispatch_notification = True
         else:
-            # Update existing unresolved alert's message and severity
+            previous_severity = existing_alert.severity
+            severity_changed = (previous_severity != target_severity)
             existing_alert.message = memo_result["memo"][:240] + "..."
-            existing_alert.severity = (
-                AlertSeverityEnum.critical
-                if pred_cat == "critical"
-                else AlertSeverityEnum.high
+            existing_alert.severity = target_severity
+            target_alert = existing_alert
+
+            # Check if alert has any prior notification
+            has_prior_notification = (
+                db.query(NotificationLog)
+                .filter(NotificationLog.alert_id == existing_alert.id)
+                .first() is not None
             )
+
+            # Case (b): Existing alert severity changed (e.g. HIGH -> CRITICAL) or backfill un-notified alert
+            if severity_changed or not has_prior_notification:
+                should_dispatch_notification = True
+            else:
+                # Severity unchanged and notification already logged -> do NOT duplicate
+                should_dispatch_notification = False
+
+        if should_dispatch_notification and target_alert:
+            # Determine top delay driver from explanation factors
+            top_driver = "Statutory milestone delays"
+            if explanation.get("factors"):
+                risk_factors = [
+                    f for f in explanation["factors"] if f.get("direction") == "increases_risk"
+                ]
+                if risk_factors:
+                    top_driver = risk_factors[0].get(
+                        "display_name", risk_factors[0].get("feature", "Statutory milestone delays")
+                    )
+                else:
+                    top_driver = explanation["factors"][0].get(
+                        "display_name", "Statutory milestone delays"
+                    )
+
+            notif_msg = (
+                f"LandSight AI Alert: {proj.project_code} flagged {pred_cat.upper()} risk — "
+                f"{top_driver}. Immediate review required."
+            )
+
+            simulated_notif = NotificationLog(
+                alert_id=target_alert.id,
+                channel="sms",
+                recipient_role="District Collector",
+                message=notif_msg,
+                data_source=proj.data_source,
+            )
+            db.add(simulated_notif)
+            notification_dispatched = True
+        elif target_alert and not should_dispatch_notification:
+            # Fetch latest existing notification message for UI feedback
+            latest_n = (
+                db.query(NotificationLog)
+                .filter(NotificationLog.alert_id == target_alert.id)
+                .order_by(NotificationLog.sent_at.desc())
+                .first()
+            )
+            if latest_n:
+                notif_msg = latest_n.message
 
     db.commit()
 
@@ -243,6 +323,8 @@ def generate_project_recommendation(
             for r in persisted_recs
         ],
         alert_created=alert_created,
+        notification_dispatched=notification_dispatched,
+        notification_message=notif_msg,
     )
 
 
@@ -282,3 +364,86 @@ def get_project_recommendations(
             for r in recs
         ],
     )
+
+
+@router.get(
+    "/alerts/{alert_id}/notifications",
+    response_model=List[NotificationLogItem],
+    tags=["AI Recommendations & Alerts"],
+)
+def get_alert_notifications(
+    alert_id: str,
+    db: Session = Depends(get_db),
+):
+    """Retrieves simulated notification dispatch logs for an alert (by alert UUID, or project UUID/code)."""
+    target_alert_id = None
+    try:
+        a_uuid = UUID(alert_id)
+        alert = db.query(Alert).filter(Alert.id == a_uuid).first()
+        if alert:
+            target_alert_id = alert.id
+    except ValueError:
+        pass
+
+    if not target_alert_id:
+        try:
+            proj = get_project_or_404(db, alert_id)
+            latest_alert = (
+                db.query(Alert)
+                .filter(Alert.project_id == proj.id)
+                .order_by(Alert.triggered_at.desc())
+                .first()
+            )
+            if latest_alert:
+                target_alert_id = latest_alert.id
+        except HTTPException:
+            pass
+
+    if not target_alert_id:
+        # Check if direct alert_id matches notification_log directly
+        try:
+            a_uuid = UUID(alert_id)
+            notifs = (
+                db.query(NotificationLog)
+                .filter(NotificationLog.alert_id == a_uuid)
+                .order_by(NotificationLog.sent_at.desc())
+                .all()
+            )
+            if notifs:
+                return [
+                    NotificationLogItem(
+                        id=str(n.id),
+                        alert_id=str(n.alert_id),
+                        channel=n.channel,
+                        recipient_role=n.recipient_role,
+                        message=n.message,
+                        sent_at=n.sent_at,
+                    )
+                    for n in notifs
+                ]
+        except ValueError:
+            pass
+
+        raise HTTPException(
+            status_code=404,
+            detail=f"Alert with identifier '{alert_id}' not found.",
+        )
+
+    notifs = (
+        db.query(NotificationLog)
+        .filter(NotificationLog.alert_id == target_alert_id)
+        .order_by(NotificationLog.sent_at.desc())
+        .all()
+    )
+
+    return [
+        NotificationLogItem(
+            id=str(n.id),
+            alert_id=str(n.alert_id),
+            channel=n.channel,
+            recipient_role=n.recipient_role,
+            message=n.message,
+            sent_at=n.sent_at,
+        )
+        for n in notifs
+    ]

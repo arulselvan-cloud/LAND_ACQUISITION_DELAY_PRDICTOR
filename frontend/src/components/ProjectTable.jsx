@@ -1,5 +1,5 @@
 import React from 'react';
-import { Search, Filter, ChevronLeft, ChevronRight, ArrowUpRight } from 'lucide-react';
+import { Search, Filter, ChevronLeft, ChevronRight, ArrowUpRight, GitFork } from 'lucide-react';
 
 const INDIAN_STATES = [
   'Andhra Pradesh', 'Bihar', 'Gujarat', 'Karnataka', 'Madhya Pradesh',
@@ -24,6 +24,11 @@ export default function ProjectTable({
   onSelectProject = () => {},
   selectedProjectId = null,
   loading = false,
+  comparisonSelectedIds = [],
+  onToggleComparison = () => {},
+  onOpenComparison = () => {},
+  onSelectTrio = () => {},
+  onClearComparison = () => {},
 }) {
   // Filter by local search query on code or name
   const filteredProjects = projects.filter((p) => {
@@ -111,27 +116,88 @@ export default function ProjectTable({
           )}
         </div>
 
-        {/* Page size selector */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-          <span>Rows per page:</span>
-          <select
-            className="select-control"
-            value={pageSize}
-            onChange={(e) => onPageSizeChange(Number(e.target.value))}
-            style={{ padding: '4px 8px' }}
+        {/* Page size selector & Comparison Quick Trigger */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
+          <button
+            className="chip-btn"
+            style={{ fontSize: '0.74rem', padding: '5px 10px', display: 'flex', alignItems: 'center', gap: '5px' }}
+            onClick={onSelectTrio}
+            title="Compare Showcase Projects: CBIC, BSRP, MAHSR side-by-side"
           >
-            <option value={20}>20</option>
-            <option value={50}>50</option>
-            <option value={100}>100 (Max)</option>
-          </select>
+            <GitFork size={13} />
+            <span>Compare Showcase Trio</span>
+          </button>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <span>Rows:</span>
+            <select
+              className="select-control"
+              value={pageSize}
+              onChange={(e) => onPageSizeChange(Number(e.target.value))}
+              style={{ padding: '4px 8px' }}
+            >
+              <option value={20}>20</option>
+              <option value={50}>50</option>
+              <option value={100}>100 (Max)</option>
+            </select>
+          </div>
         </div>
       </div>
+
+      {/* Comparison Action Bar */}
+      {comparisonSelectedIds.length > 0 && (
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            padding: '10px 16px',
+            background: 'rgba(30, 58, 138, 0.08)',
+            border: '1px solid rgba(30, 58, 138, 0.25)',
+            borderRadius: '8px',
+            margin: '0 20px 12px 20px',
+            fontSize: '0.82rem',
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <GitFork size={16} style={{ color: 'var(--gov-blue)' }} />
+            <span>
+              <strong>{comparisonSelectedIds.length}</strong> {comparisonSelectedIds.length === 1 ? 'project' : 'projects'} selected for comparison:
+              <span style={{ marginLeft: '6px', color: 'var(--gov-blue)', fontWeight: 600 }}>
+                {comparisonSelectedIds.join(', ')}
+              </span>
+              {comparisonSelectedIds.length < 2 && (
+                <span style={{ color: 'var(--text-muted)', marginLeft: '6px' }}>(Select 2 or 3 to compare)</span>
+              )}
+            </span>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            {comparisonSelectedIds.length >= 2 && (
+              <button
+                className="btn-primary"
+                style={{ padding: '6px 14px', fontSize: '0.78rem' }}
+                onClick={onOpenComparison}
+              >
+                Compare Side-by-Side ({comparisonSelectedIds.length})
+              </button>
+            )}
+            <button
+              className="btn-paginate"
+              style={{ padding: '6px 10px', fontSize: '0.78rem' }}
+              onClick={onClearComparison}
+            >
+              Clear
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Table Container */}
       <div className="table-container">
         <table className="gov-table">
           <thead>
             <tr>
+              <th style={{ width: '40px', textAlign: 'center' }}>Select</th>
               <th>Project Code</th>
               <th>Project Name</th>
               <th>District & State</th>
@@ -144,28 +210,45 @@ export default function ProjectTable({
           <tbody>
             {loading ? (
               <tr>
-                <td colSpan={7} style={{ textAlign: 'center', padding: '36px', color: 'var(--text-muted)' }}>
+                <td colSpan={8} style={{ textAlign: 'center', padding: '36px', color: 'var(--text-muted)' }}>
                   Loading project records from PostgreSQL...
                 </td>
               </tr>
             ) : filteredProjects.length === 0 ? (
               <tr>
-                <td colSpan={7} style={{ textAlign: 'center', padding: '36px', color: 'var(--text-muted)' }}>
+                <td colSpan={8} style={{ textAlign: 'center', padding: '36px', color: 'var(--text-muted)' }}>
                   No infrastructure projects match the selected criteria.
                 </td>
               </tr>
             ) : (
               filteredProjects.map((p) => {
+                const code = p.project_code || p.id;
                 const isSelected = selectedProjectId === p.id || selectedProjectId === p.project_code;
+                const isCompared = comparisonSelectedIds.includes(code) || comparisonSelectedIds.includes(p.id);
                 const riskCat = (p.risk_category || 'low').toLowerCase();
                 const probPct = ((p.delay_probability || 0) * 100).toFixed(1);
 
                 return (
                   <tr
                     key={p.id}
-                    className={isSelected ? 'selected' : ''}
-                    onClick={() => onSelectProject(p.project_code || p.id)}
+                    className={`${isSelected ? 'selected' : ''} ${isCompared ? 'compared-row' : ''}`}
+                    onClick={() => onSelectProject(code)}
                   >
+                    <td
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onToggleComparison(code);
+                      }}
+                      style={{ width: '40px', textAlign: 'center' }}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={isCompared}
+                        onChange={() => {}}
+                        style={{ cursor: 'pointer', transform: 'scale(1.15)' }}
+                        title="Select for comparison (up to 3)"
+                      />
+                    </td>
                     <td style={{ fontFamily: 'monospace', fontWeight: 700, color: 'var(--gov-blue)' }}>
                       {p.project_code}
                     </td>
