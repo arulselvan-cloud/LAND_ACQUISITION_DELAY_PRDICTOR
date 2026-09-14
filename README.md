@@ -1,6 +1,6 @@
 # Land Acquisition Delay Predictor: AI-Powered Predictive Analytics Platform for Infrastructure Land Acquisition Delays
 
-[![Smart India Hackathon](https://img.shields.io/badge/SIH-2024-orange.svg)](https://www.sih.gov.in/)
+[![Smart India Hackathon](https://img.shields.io/badge/SIH-2026-orange.svg)](https://www.sih.gov.in/)
 [![FastAPI](https://img.shields.io/badge/Backend-FastAPI-009688.svg)](https://fastapi.tiangolo.com/)
 [![React](https://img.shields.io/badge/Frontend-React_18_%2B_Vite-61DAFB.svg)](https://react.dev/)
 [![Python](https://img.shields.io/badge/Python-3.11+-3776AB.svg)](https://www.python.org/)
