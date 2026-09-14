@@ -131,9 +131,13 @@ python backend/scripts/seed_data.py
 ```
 
 ### Step 6: Start the FastAPI Backend
+Launch the backend from the **project root directory** (`SIH PROTOTYPE`), with your virtual environment activated:
 ```bash
 uvicorn backend.app.main:app --reload --port 8000
 ```
+> [!IMPORTANT]
+> **Always run this command from the project root directory.** Do not `cd backend && uvicorn app.main:app` — running from the project root ensures Python packages, imports, and environment variables (`.env`) resolve correctly.
+
 - API Health Check: `http://localhost:8000/api/health`
 - Interactive OpenAPI Swagger Docs: `http://localhost:8000/docs`
 

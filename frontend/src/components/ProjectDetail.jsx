@@ -37,6 +37,13 @@ import {
   getProjectRecommendations
 } from '../api/client';
 
+const GENERATION_STEPS = [
+  'Analyzing SHAP risk factors...',
+  'Consulting Gemini 2.5 Flash...',
+  'Drafting statutory action memo...',
+  'Finalizing directive...',
+];
+
 export default function ProjectDetail({
   projectId,
   onClose = () => {}
@@ -59,9 +66,22 @@ export default function ProjectDetail({
   const [recommendations, setRecommendations] = useState([]);
   const [aiMemo, setAiMemo] = useState(null);
   const [generatingRec, setGeneratingRec] = useState(false);
+  const [loadingStepIndex, setLoadingStepIndex] = useState(0);
   const [recError, setRecError] = useState(null);
 
   const debounceTimerRef = useRef(null);
+
+  // Rotating status steps every ~4 seconds while waiting for Gemini
+  useEffect(() => {
+    if (!generatingRec) {
+      setLoadingStepIndex(0);
+      return;
+    }
+    const timer = setInterval(() => {
+      setLoadingStepIndex((prev) => (prev + 1) % GENERATION_STEPS.length);
+    }, 4000);
+    return () => clearInterval(timer);
+  }, [generatingRec]);
 
   // Load project data, initial predictions, and recommendations
   useEffect(() => {
@@ -133,7 +153,9 @@ export default function ProjectDetail({
 
   // Triggers Gemini 2.5 Flash administrative memo and recommendations generation
   const handleGenerateRecommendation = async (simulateFailure = false) => {
+    if (generatingRec) return;
     setGeneratingRec(true);
+    setLoadingStepIndex(0);
     setRecError(null);
     try {
       const res = await generateProjectRecommendation(projectId, simulateFailure);
@@ -590,10 +612,11 @@ export default function ProjectDetail({
                       alignItems: 'center',
                       gap: '6px',
                       cursor: generatingRec ? 'not-allowed' : 'pointer',
+                      opacity: generatingRec ? 0.85 : 1,
                     }}
                   >
                     <RefreshCw size={13} className={generatingRec ? 'spin' : ''} />
-                    {generatingRec ? 'Generating AI Directive...' : (aiMemo ? 'Regenerate Action Plan' : 'Generate Action Plan')}
+                    {generatingRec ? GENERATION_STEPS[loadingStepIndex] : (aiMemo ? 'Regenerate Action Plan' : 'Generate Action Plan')}
                   </button>
                 </div>
 
@@ -607,9 +630,62 @@ export default function ProjectDetail({
                   </div>
                 )}
 
+                {/* Purposeful Gemini Loading State */}
+                {generatingRec && (
+                  <div
+                    className="memo-fade-in"
+                    style={{
+                      textAlign: 'center',
+                      padding: '28px 20px',
+                      background: 'linear-gradient(180deg, #f0f7ff 0%, #f8fafc 100%)',
+                      borderRadius: 'var(--radius-md)',
+                      border: '1px solid #bfdbfe',
+                      marginBottom: '16px',
+                    }}
+                  >
+                    <div
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        width: '46px',
+                        height: '46px',
+                        borderRadius: '50%',
+                        background: 'rgba(30, 86, 160, 0.1)',
+                        marginBottom: '10px',
+                      }}
+                    >
+                      <RefreshCw size={22} className="spin" style={{ color: 'var(--gov-blue)' }} />
+                    </div>
+                    <div
+                      className="pulse-text"
+                      style={{
+                        fontSize: '0.92rem',
+                        fontWeight: 700,
+                        color: 'var(--gov-navy)',
+                        marginBottom: '6px',
+                        minHeight: '22px',
+                        transition: 'opacity 0.25s ease',
+                      }}
+                    >
+                      {GENERATION_STEPS[loadingStepIndex]}
+                    </div>
+                    <div
+                      style={{
+                        fontSize: '0.77rem',
+                        color: 'var(--text-muted)',
+                        maxWidth: '440px',
+                        margin: '0 auto',
+                      }}
+                    >
+                      Synthesizing explainable SHAP risk drivers and RFCTLARR 2013 statutory frameworks into executive directives.
+                    </div>
+                  </div>
+                )}
+
                 {/* AI Executive Action Memo */}
-                {aiMemo && (
-                  <div className="ai-memo-container">
+                {aiMemo && !generatingRec && (
+                  <div className="ai-memo-container memo-fade-in">
                     <div className="ai-memo-header">
                       <div className="ai-memo-tag">
                         <Sparkles size={14} style={{ color: 'var(--gov-blue)' }} />
@@ -624,8 +700,8 @@ export default function ProjectDetail({
                 )}
 
                 {/* Actionable Directives List */}
-                {recommendations && recommendations.filter(r => r.category !== 'Executive Directive').length > 0 ? (
-                  <div>
+                {!generatingRec && recommendations && recommendations.filter(r => r.category !== 'Executive Directive').length > 0 ? (
+                  <div className="memo-fade-in">
                     <div style={{ fontSize: '0.75rem', fontWeight: 800, textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '6px' }}>
                       <FileText size={14} />
                       <span>Statutory Administrative Directives</span>
@@ -654,7 +730,7 @@ export default function ProjectDetail({
                         })}
                     </div>
                   </div>
-                ) : !aiMemo && (
+                ) : !aiMemo && !generatingRec && (
                   <div style={{ textAlign: 'center', padding: '24px 16px', background: '#f8fafc', borderRadius: 'var(--radius-md)', border: '1px dashed #cbd5e1' }}>
                     <Sparkles size={24} style={{ color: 'var(--gov-blue)', margin: '0 auto 8px', display: 'block' }} />
                     <div style={{ fontSize: '0.85rem', fontWeight: 600, color: 'var(--text-primary)', marginBottom: '4px' }}>
@@ -670,7 +746,7 @@ export default function ProjectDetail({
                       style={{ fontSize: '0.8rem', padding: '6px 16px', display: 'inline-flex', alignItems: 'center', gap: '6px' }}
                     >
                       <Sparkles size={14} />
-                      {generatingRec ? 'Synthesizing with Gemini 2.5 Flash...' : 'Generate Action Plan Now'}
+                      Generate Action Plan Now
                     </button>
                   </div>
                 )}

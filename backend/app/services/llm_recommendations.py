@@ -9,11 +9,17 @@ Includes robust 5-second timeout and automatic fallback to rule-based templates 
 
 import logging
 import os
+from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 import dotenv
 
-dotenv.load_dotenv()
+ROOT_DIR = Path(__file__).resolve().parents[3]
+ENV_FILE = ROOT_DIR / ".env"
+if ENV_FILE.exists():
+    dotenv.load_dotenv(ENV_FILE)
+else:
+    dotenv.load_dotenv()
 
 logger = logging.getLogger("landsight.llm_recommendations")
 
@@ -216,7 +222,7 @@ STRICT DIRECTIVE INSTRUCTIONS:
 Tone: Formal Indian administrative English. Output ONLY the memo text without any titles or markdown asterisks/bullets."""
 
         model = genai.GenerativeModel("gemini-2.5-flash")
-        timeout_sec = float(os.getenv("GEMINI_TIMEOUT_SECONDS", "12.0"))
+        timeout_sec = float(os.getenv("GEMINI_TIMEOUT_SECONDS", "30.0"))
         response = model.generate_content(prompt, request_options=RequestOptions(timeout=timeout_sec))
         memo_text = response.text.strip()
         # Clean any leading title if model outputs one
