@@ -72,8 +72,8 @@ Ensure you have the following installed on your host system:
 
 ### Step 1: Clone the Repository
 ```bash
-git clone https://github.com/arulselvan-cloud/LANDSIGHT_AI.git
-cd LANDSIGHT_AI
+git clone https://github.com/arulselvan-cloud/LAND_ACQUISITION_DELAY_PREDICTOR.git
+cd LAND_ACQUISITION_DELAY_PREDICTOR
 ```
 
 ### Step 2: Configure Environment Variables
