@@ -53,6 +53,7 @@ class ExplainResponse(BaseModel):
     predicted_risk_category: str
     factors: List[SHAPFactor]
     prediction_probabilities: Dict[str, float]
+    baseline_features: Optional[Dict[str, Any]] = None
 
 
 class PropagationStage(BaseModel):
@@ -160,11 +161,16 @@ def explain_project_risk(
         for d in explanation["top_drivers"]
     ]
 
+    baseline_feats = {
+        d["feature"]: d["value"] for d in explanation.get("all_drivers", [])
+    }
+
     return ExplainResponse(
         project_id=canonical_id,
         predicted_risk_category=explanation["predicted_risk_category"],
         factors=top_drivers,
         prediction_probabilities=explanation["prediction_probabilities"],
+        baseline_features=baseline_feats,
     )
 
 

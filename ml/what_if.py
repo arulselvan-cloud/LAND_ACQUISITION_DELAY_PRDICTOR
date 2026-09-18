@@ -190,6 +190,11 @@ def what_if(
                 "class_probabilities": {
                     inv_label_map[i]: round(float(base_probs[i]), 4) for i in range(len(base_probs))
                 },
+                "features": {
+                    "compensation_disbursed_pct": float(base_features.get("compensation_disbursed_pct", 0.0)),
+                    "avg_stakeholder_responsiveness": float(base_features.get("avg_stakeholder_responsiveness", 0.0)),
+                    "has_active_legal_dispute": int(base_features.get("has_active_legal_dispute", 0)),
+                },
             },
             "counterfactual": {
                 "risk_category": cf_cat,

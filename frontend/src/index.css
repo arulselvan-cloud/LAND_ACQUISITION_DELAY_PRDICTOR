@@ -885,6 +885,38 @@ body {
   border: 1px solid var(--border-light);
 }
 
+.whatif-controls-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.whatif-reset-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 10px;
+  font-size: 0.74rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  background: #ffffff;
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.whatif-reset-btn:hover {
+  background: var(--bg-card);
+  color: var(--gov-navy);
+  border-color: var(--gov-blue);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.whatif-reset-btn:active {
+  transform: scale(0.98);
+}
+
 .slider-group {
   display: flex;
   flex-direction: column;

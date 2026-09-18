@@ -15,6 +15,7 @@ import {
   Scale,
   Sparkles,
   RefreshCw,
+  RotateCcw,
   FileText
 } from 'lucide-react';
 import {
@@ -55,12 +56,21 @@ export default function ProjectDetail({
   const [whatIfData, setWhatIfData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [whatIfLoading, setWhatIfLoading] = useState(false);
+  const [isSimulated, setIsSimulated] = useState(false);
   const [error, setError] = useState(null);
 
   // What-if interactive slider states
   const [compDisbursedPct, setCompDisbursedPct] = useState(50);
   const [stakeholderResp, setStakeholderResp] = useState(50);
   const [activeDispute, setActiveDispute] = useState(0);
+
+  // Baseline / original database values ref to preserve true initial values
+  const originalValuesRef = useRef({
+    compDisbursedPct: 50,
+    stakeholderResp: 50,
+    activeDispute: 0,
+  });
+  const baselineWhatIfDataRef = useRef(null);
 
   // Recommendations and AI memo states
   const [recommendations, setRecommendations] = useState([]);
@@ -113,29 +123,63 @@ export default function ProjectDetail({
           setAiMemo(execDirective.action_text);
         }
 
-        // Find initial feature values for what-if sliders
-        const compDriver = expData.factors.find(f => f.feature === 'compensation_disbursed_pct');
-        const disputeDriver = expData.factors.find(f => f.feature === 'has_active_legal_dispute');
-        const respDriver = expData.factors.find(f => f.feature === 'avg_stakeholder_responsiveness');
+        // Find initial feature values for what-if sliders from project telemetry
+        const bFeats = expData?.baseline_features || {};
+        const compVal = bFeats.compensation_disbursed_pct !== undefined
+          ? bFeats.compensation_disbursed_pct
+          : expData?.factors?.find(f => f.feature === 'compensation_disbursed_pct')?.value;
+        const disputeVal = bFeats.has_active_legal_dispute !== undefined
+          ? bFeats.has_active_legal_dispute
+          : expData?.factors?.find(f => f.feature === 'has_active_legal_dispute')?.value;
+        const respVal = bFeats.avg_stakeholder_responsiveness !== undefined
+          ? bFeats.avg_stakeholder_responsiveness
+          : expData?.factors?.find(f => f.feature === 'avg_stakeholder_responsiveness')?.value;
 
-        const initialComp = compDriver && compDriver.value !== null ? Number(compDriver.value) : 50;
-        const initialDispute = disputeDriver && disputeDriver.value !== null ? Number(disputeDriver.value) : 0;
-        const initialResp = respDriver && respDriver.value !== null ? Number(respDriver.value) : 50;
+        const initialComp = compVal !== null && compVal !== undefined ? Number(compVal) : 50;
+        const initialDispute = disputeVal !== null && disputeVal !== undefined && Number(disputeVal) > 0 ? 1 : 0;
+        const initialResp = respVal !== null && respVal !== undefined ? Number(respVal) : 50;
 
-        setCompDisbursedPct(Math.round(initialComp));
-        setActiveDispute(initialDispute ? 1 : 0);
-        setStakeholderResp(Math.round(initialResp));
+        const origComp = Math.round(initialComp);
+        const origDispute = initialDispute;
+        const origResp = Math.round(initialResp);
+
+        originalValuesRef.current = {
+          compDisbursedPct: origComp,
+          activeDispute: origDispute,
+          stakeholderResp: origResp,
+        };
+
+        setCompDisbursedPct(origComp);
+        setActiveDispute(origDispute);
+        setStakeholderResp(origResp);
+        setIsSimulated(false);
 
         // Trigger initial what-if baseline
         return simulateWhatIf(projectId, {
           compensation_disbursed_pct: initialComp,
-          has_active_legal_dispute: initialDispute ? 1 : 0,
+          has_active_legal_dispute: initialDispute,
           avg_stakeholder_responsiveness: initialResp,
         });
       })
       .then((whatIfRes) => {
         if (!isMounted || !whatIfRes) return;
+        if (whatIfRes.baseline?.features) {
+          const bf = whatIfRes.baseline.features;
+          const trueComp = Math.round(Number(bf.compensation_disbursed_pct));
+          const trueResp = Math.round(Number(bf.avg_stakeholder_responsiveness));
+          const trueDispute = Number(bf.has_active_legal_dispute) > 0 ? 1 : 0;
+          originalValuesRef.current = {
+            compDisbursedPct: trueComp,
+            stakeholderResp: trueResp,
+            activeDispute: trueDispute,
+          };
+          setCompDisbursedPct(trueComp);
+          setStakeholderResp(trueResp);
+          setActiveDispute(trueDispute);
+        }
+        baselineWhatIfDataRef.current = whatIfRes;
         setWhatIfData(whatIfRes);
+        setIsSimulated(false);
         setLoading(false);
       })
       .catch((err) => {
@@ -182,6 +226,7 @@ export default function ProjectDetail({
       })
         .then((res) => {
           setWhatIfData(res);
+          setIsSimulated(true);
           setWhatIfLoading(false);
         })
         .catch((err) => {
@@ -189,6 +234,32 @@ export default function ProjectDetail({
           setWhatIfLoading(false);
         });
     }, 300);
+  };
+
+  // Restores all What-If inputs to original database values & clears counterfactual result state
+  const handleResetWhatIf = () => {
+    // 1. Cancel any pending debounced API request immediately
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+      debounceTimerRef.current = null;
+    }
+    setWhatIfLoading(false);
+
+    // 2. Pure frontend state reset back to original project values loaded from database
+    const orig = originalValuesRef.current;
+    setCompDisbursedPct(orig.compDisbursedPct);
+    setStakeholderResp(orig.stakeholderResp);
+    setActiveDispute(orig.activeDispute);
+
+    // 3. Clear simulated counterfactual result state and revert to baseline prediction
+    setIsSimulated(false);
+    if (baselineWhatIfDataRef.current) {
+      setWhatIfData({
+        ...baselineWhatIfDataRef.current,
+        counterfactual: baselineWhatIfDataRef.current.baseline,
+        impact: null,
+      });
+    }
   };
 
   const handleCompChange = (val) => {
@@ -463,6 +534,22 @@ export default function ProjectDetail({
                 <div className="whatif-grid">
                   {/* Controls */}
                   <div className="whatif-controls">
+                    <div className="whatif-controls-header">
+                      <span style={{ fontSize: '0.78rem', fontWeight: 800, textTransform: 'uppercase', color: 'var(--text-muted)', letterSpacing: '0.5px' }}>
+                        Policy Levers
+                      </span>
+                      <button
+                        type="button"
+                        onClick={handleResetWhatIf}
+                        className="whatif-reset-btn"
+                        id="whatif-reset-btn"
+                        title="Restore all What-If inputs to original project values"
+                      >
+                        <RotateCcw size={13} />
+                        Reset
+                      </button>
+                    </div>
+
                     <div className="slider-group">
                       <div className="slider-header">
                         <span>Compensation Disbursement Rate</span>
@@ -510,11 +597,24 @@ export default function ProjectDetail({
                       </label>
                     </div>
 
-                    {whatIfLoading && (
-                      <div style={{ fontSize: '0.75rem', color: 'var(--gov-blue)', textAlign: 'right', fontStyle: 'italic' }}>
-                        Simulating counterfactual outcomes...
-                      </div>
-                    )}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '2px' }}>
+                      <button
+                        type="button"
+                        onClick={handleResetWhatIf}
+                        className="whatif-reset-btn"
+                        id="whatif-reset-btn-bottom"
+                        title="Restore all What-If inputs to original project values"
+                      >
+                        <RotateCcw size={13} />
+                        Reset to Original
+                      </button>
+
+                      {whatIfLoading && (
+                        <div style={{ fontSize: '0.75rem', color: 'var(--gov-blue)', fontStyle: 'italic', marginLeft: 'auto' }}>
+                          Simulating counterfactual outcomes...
+                        </div>
+                      )}
+                    </div>
                   </div>
 
                   {/* Side-by-Side Comparison */}
@@ -548,37 +648,49 @@ export default function ProjectDetail({
                     </div>
 
                     {/* Counterfactual Box */}
-                    <div className="comparison-box counterfactual">
-                      <div style={{ fontSize: '0.74rem', fontWeight: 800, textTransform: 'uppercase', color: 'var(--gov-blue)', marginBottom: '8px' }}>
-                        Counterfactual State
-                      </div>
-                      <div style={{ marginBottom: '8px' }}>
-                        <span className={`risk-badge ${(whatIfData?.counterfactual?.risk_category || 'low').toLowerCase()}`}>
-                          {whatIfData?.counterfactual?.risk_category || 'low'}
-                        </span>
-                      </div>
-                      <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
-                        <div>Delay Prob: <strong style={{ color: 'var(--gov-blue)' }}>{((whatIfData?.counterfactual?.delay_probability || 0) * 100).toFixed(1)}%</strong></div>
-                        <div>Actual Delay So Far: <strong>{whatIfData?.baseline?.actual_delay_so_far_days || 0} days</strong></div>
-                        <div style={{ marginTop: '4px', borderTop: '1px dashed #93c5fd', paddingTop: '4px' }}>
-                          <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Additional Delay Forecast:</span>
-                          <div style={{ fontSize: '0.74rem' }}>
-                            &bull; Comp: {whatIfData?.counterfactual?.stage_breakdown?.additional_expected_compensation_delay_days || 0}d
+                    {(() => {
+                      const displayCf = isSimulated ? whatIfData?.counterfactual : whatIfData?.baseline;
+                      return (
+                        <div className="comparison-box counterfactual">
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                            <div style={{ fontSize: '0.74rem', fontWeight: 800, textTransform: 'uppercase', color: 'var(--gov-blue)' }}>
+                              Counterfactual State
+                            </div>
+                            {!isSimulated && (
+                              <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', fontStyle: 'italic' }}>
+                                (Baseline)
+                              </span>
+                            )}
                           </div>
-                          <div style={{ fontSize: '0.74rem' }}>
-                            &bull; Poss: {whatIfData?.counterfactual?.stage_breakdown?.additional_expected_possession_delay_days || 0}d
+                          <div style={{ marginBottom: '8px' }}>
+                            <span className={`risk-badge ${(displayCf?.risk_category || 'low').toLowerCase()}`}>
+                              {displayCf?.risk_category || 'low'}
+                            </span>
                           </div>
-                          <div style={{ fontWeight: 700, color: 'var(--gov-blue)' }}>
-                            Total Addl: {whatIfData?.counterfactual?.expected_delay_days || 0}d
+                          <div style={{ fontSize: '0.78rem', color: 'var(--text-secondary)', lineHeight: 1.6 }}>
+                            <div>Delay Prob: <strong style={{ color: 'var(--gov-blue)' }}>{((displayCf?.delay_probability || 0) * 100).toFixed(1)}%</strong></div>
+                            <div>Actual Delay So Far: <strong>{whatIfData?.baseline?.actual_delay_so_far_days || 0} days</strong></div>
+                            <div style={{ marginTop: '4px', borderTop: '1px dashed #93c5fd', paddingTop: '4px' }}>
+                              <span style={{ fontSize: '0.72rem', color: 'var(--text-muted)' }}>Additional Delay Forecast:</span>
+                              <div style={{ fontSize: '0.74rem' }}>
+                                &bull; Comp: {displayCf?.stage_breakdown?.additional_expected_compensation_delay_days || 0}d
+                              </div>
+                              <div style={{ fontSize: '0.74rem' }}>
+                                &bull; Poss: {displayCf?.stage_breakdown?.additional_expected_possession_delay_days || 0}d
+                              </div>
+                              <div style={{ fontWeight: 700, color: 'var(--gov-blue)' }}>
+                                Total Addl: {displayCf?.expected_delay_days || 0}d
+                              </div>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    </div>
+                      );
+                    })()}
                   </div>
                 </div>
 
                 {/* Net Impact Banner */}
-                {whatIfData?.impact && (
+                {isSimulated && whatIfData?.impact && (
                   <div className="impact-banner">
                     <TrendingDown size={22} style={{ flexShrink: 0 }} />
                     <div>
